@@ -20,6 +20,7 @@ import {
 import ProjectItem from "./project-item";
 import { ProjectT } from "@/src/API/project";
 import { testProjects } from "@/src/testdata/testdata";
+import { ThemeSwitch } from "@/components/theme-switch";
 function Page() {
   const {
     isOpen: isJoinOpen,

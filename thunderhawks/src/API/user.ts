@@ -1,12 +1,11 @@
 import { Endpoint } from "./endpoint";
-import { ProjectT } from "./project";
+import { LocalStorageTokenManager, TokenManagerI } from "./token_manager";
 type UserRegisterT = {
   message: string;
   user: {
     id: string;
     username: string;
     email: string;
-    projects: [];
     createdAt: string;
   };
   token: string;
@@ -17,7 +16,6 @@ type UserLoginT = {
     id: string;
     username: string;
     email: string;
-    projects: [];
     createdAt: string;
   };
   token: string;
@@ -32,7 +30,6 @@ export type UserDataT = {
   id: string;
   username: string;
   email: string;
-  projects: ProjectT[];
   createdAt: string;
 };
 export default class User {
@@ -40,14 +37,22 @@ export default class User {
   token: string;
   constructor(data: UserDataT, token: string) {
     this.data = data;
-    this.token = "";
+    this.token = token;
   }
+
   static login(payload: { email: string; password: string }): Promise<User> {
     return Endpoint.request<UserLoginT>("post", {
       url: "auth/login",
       data: payload,
-    }).then((resp) => new User(resp.data.user, resp.data.token));
+    }).then((resp) => {
+      localStorage.setItem(
+        "dancehub-user-token",
+        Buffer.from(resp.data.token).toString("base64")
+      );
+      return new User(resp.data.user, resp.data.token);
+    });
   }
+
   static register(payload: {
     email: string;
     password: string;
@@ -56,6 +61,25 @@ export default class User {
     return Endpoint.request<UserRegisterT>("post", {
       url: "auth/register",
       data: payload,
-    }).then((resp) => new User(resp.data.user, resp.data.token));
+    }).then((resp) => {
+      localStorage.setItem(
+        "dancehub-user-token",
+        Buffer.from(resp.data.token).toString("base64")
+      );
+      return new User(resp.data.user, resp.data.token);
+    });
+  }
+
+  static getUser(payload: { token: string }): Promise<User> {
+    return Endpoint.request<UserLoginT>("get", {
+      url: `auth/user`,
+      data: payload,
+    }).then((resp) => {
+      localStorage.setItem(
+        "dancehub-user-token",
+        Buffer.from(resp.data.token).toString("base64")
+      );
+      return new User(resp.data.user, resp.data.token);
+    });
   }
 }

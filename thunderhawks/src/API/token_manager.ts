@@ -46,7 +46,7 @@ export class InMemoryTokenManager<T> implements TokenManagerI<T> {
 export class LocalStorageTokenManager implements TokenManagerI<string> {
   token: string;
   storageKey: string;
-  constructor(token: string, storageKey: string = "pharmaco-backend-token") {
+  constructor(token: string, storageKey: string = "thunderhawk-token") {
     this.token = token;
     this.storageKey = storageKey;
   }
@@ -80,7 +80,7 @@ export class LocalStorageTokenManager implements TokenManagerI<string> {
    * @returns null if a the load fails. Otherwise success.
    */
   static load(
-    storageKey: string = "pharmaco-backend-token"
+    storageKey: string = "thunderhawk-token",
   ): LocalStorageTokenManager | null {
     const loadedItem = LocalStorageTokenManager._load(storageKey);
     return loadedItem === null

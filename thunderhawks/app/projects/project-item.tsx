@@ -11,25 +11,20 @@ import {
 } from "@nextui-org/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faTrash, faUsers } from "@fortawesome/free-solid-svg-icons";
-import { ProjectT } from "@/src/API/project";
+import Project, { ProjectT } from "@/src/API/project";
 import { useRouter } from "next/navigation";
 
 interface ProjectItemProps {
-  project: ProjectT;
-  deleteProject: (id: string) => void;
-  // leaveProject: (id: string) => void;
+  project: Project;
+  deleteProject: (project: Project) => void;
 }
-const ProjectItem = ({
-  project,
-  deleteProject,
-  // leaveProject,
-}: ProjectItemProps) => {
+const ProjectItem = ({ project, deleteProject }: ProjectItemProps) => {
   const {
     isOpen: isProjectSettingOpen,
     onOpen: onProjectSettingOpen,
     onOpenChange: onProjectSettingOpenChange,
   } = useDisclosure();
-  const { id, title, administrator, members, videos } = project;
+  const { id, title, administrator, members, videos } = project.data;
   const router = useRouter();
 
   const copyInvitationCode = React.useCallback(() => {
@@ -74,7 +69,7 @@ const ProjectItem = ({
                 className="bg-background"
                 radius="full"
                 size="sm"
-                onPress={() => deleteProject(id)}
+                onPress={() => deleteProject(project)}
               >
                 <FontAwesomeIcon
                   className="text-default-600 size-3"

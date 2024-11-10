@@ -6,12 +6,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import User from "@/src/API/user";
+import { UserContext } from "@/utils/user-context";
 function Register() {
   const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
+  const { setUser } = React.useContext(UserContext);
   const handleRegister = React.useCallback(() => {
     if (email === "" || password === "" || name === "") {
       setErrorMessage("Please fill all the fields to continue");
@@ -20,15 +22,16 @@ function Register() {
     User.register({ email, password, name })
       .then((resp) => {
         if (resp.token) {
+          setUser(resp);
           localStorage.setItem("thunderhawks-token", resp.token);
           router.push("/projects");
         }
       })
       .catch((err) => {
-        setErrorMessage("Something went wrong");
+        setErrorMessage("Something went wrong, please try again later");
         console.error(err);
       });
-  }, []);
+  }, [email, password, name, setUser]);
 
   return (
     <div className="flex flex-col justify-center items-center h-full">

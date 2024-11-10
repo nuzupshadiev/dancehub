@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
-import React from "react";
+import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFolderClosed,
@@ -18,9 +18,10 @@ import {
 } from "@nextui-org/react";
 
 import ProjectItem from "./project-item";
-import { ProjectT } from "@/src/API/project";
+import Project, { ProjectT } from "@/src/API/project";
 import { testProjects } from "@/src/testdata/testdata";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { UserContext } from "@/utils/user-context";
 function Page() {
   const {
     isOpen: isJoinOpen,
@@ -36,10 +37,22 @@ function Page() {
   } = useDisclosure();
   const [warningMessage, setWarningMessage] = React.useState("");
 
-  const [projects, setProjects] = React.useState<ProjectT[]>(testProjects);
+  const [projects, setProjects] = React.useState<Project[]>([]);
   const [filterValue, setFilterValue] = React.useState("");
   const [projectName, setProjectName] = React.useState("");
   const [joinCode, setJoinCode] = React.useState("");
+  const { user } = React.useContext(UserContext);
+
+  useEffect(() => {
+    // fetch projects from server
+    Project.getProjects(user)
+      .then((projects) => {
+        setProjects(projects);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
   const onSearchChange = React.useCallback((value?: string) => {
     if (value) {
@@ -51,13 +64,55 @@ function Page() {
 
   const filteredProjects = React.useMemo(() => {
     return projects.filter((project) =>
-      project.title.toLowerCase().includes(filterValue.toLowerCase()),
+      project.data.title.toLowerCase().includes(filterValue.toLowerCase())
     );
   }, [projects, filterValue]);
 
-  const deleteProject = React.useCallback((id: string) => {
-    setProjects((prev) => prev.filter((project) => project.id !== id));
-    // send delete request to server
+  const deleteProject = React.useCallback(
+    (project: Project) => {
+      project
+        .delete(user)
+        .then(() => {
+          setProjects((prev) =>
+            prev.filter(
+              (projectItem) => projectItem.data.id !== project.data.id
+            )
+          );
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      // send delete request to server
+    },
+    [user, setProjects]
+  );
+
+  const handleJoinProject = React.useCallback(() => {
+    Project.joinProject(joinCode, user)
+      .then((project) => {
+        setProjects((prev) => [...prev, project]);
+        onJoinClose();
+      })
+      .catch((err) => {
+        setWarningMessage("Invalid join code");
+        console.error(err);
+      });
+  }, [joinCode, user]);
+
+  const handleCreateProject = React.useCallback(() => {
+    if (projectName === "") {
+      setWarningMessage("Please enter a project name");
+      return;
+    }
+    Project.createProject(projectName, user)
+      .then((project) => {
+        setProjects((prev) => [...prev, project]);
+        onCreateClose();
+      })
+      .catch((err) => {
+        setWarningMessage("Something went wrong, please try again later");
+        console.error(err);
+      });
   }, []);
 
   return (
@@ -101,8 +156,21 @@ function Page() {
         </div>
       </div>
       <div className="flex flex-col gap-4">
+        {projects.length === 0 && (
+          <div className="flex flex-col justify-center items-center h-60">
+            <FontAwesomeIcon
+              icon={faFolderClosed}
+              className="text-9xl text-default-200"
+            />
+            <p className="text-default-200 text-lg">{"No projects found"}</p>
+          </div>
+        )}
         {filteredProjects.map((project) => (
-          <ProjectItem key={project.id} project={project} deleteProject={deleteProject} />
+          <ProjectItem
+            key={project.data.id}
+            project={project}
+            deleteProject={deleteProject}
+          />
         ))}
       </div>
       <Modal isOpen={isCreateOpen} onOpenChange={onCreateOpenChange}>
@@ -128,7 +196,7 @@ function Page() {
             <Button variant="light" onPress={onCreateClose}>
               {"Cancel"}
             </Button>
-            <Button>{"Create"}</Button>
+            <Button onPress={handleCreateProject}>{"Create"}</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -138,9 +206,9 @@ function Page() {
           <ModalBody>
             <Input
               data-gtag-id="project-join-code-input"
-              label={"Invitation Code"}
+              label={"Join Code"}
               labelPlacement="outside"
-              placeholder={"Invitation Code"}
+              placeholder={"Join Code"}
               value={joinCode}
               onValueChange={setJoinCode}
             />
@@ -152,7 +220,7 @@ function Page() {
             <Button variant="light" onPress={onJoinClose}>
               {"Cancel"}
             </Button>
-            <Button>{"Join"}</Button>
+            <Button onClick={handleJoinProject}>{"Join"}</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

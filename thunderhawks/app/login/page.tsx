@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import User from "@/src/API/user";
+import { UserContext } from "@/utils/user-context";
 
 function Login() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
   const router = useRouter();
+  const { setUser } = React.useContext(UserContext);
   const handleLogin = React.useCallback(() => {
     if (email === "" || password === "") {
       setErrorMessage("Please fill all the fields to continue");
@@ -20,6 +22,8 @@ function Login() {
     User.login({ email, password })
       .then((resp) => {
         if (resp.token) {
+          setErrorMessage("");
+          setUser(resp);
           localStorage.setItem("thunderhawks-token", resp.token);
           router.push("/projects");
         }
@@ -27,7 +31,7 @@ function Login() {
       .catch(() => {
         setErrorMessage("Invalid email or password");
       });
-  }, []);
+  }, [email, password, setUser]);
 
   return (
     <div className="flex flex-col justify-center items-center h-full">
@@ -39,8 +43,8 @@ function Login() {
           </p>
         </div>
         <Input
-          label={"Email"}
-          type="email"
+          label="Email"
+          placeholder="Enter your email"
           value={email}
           variant="underlined"
           onValueChange={setEmail}

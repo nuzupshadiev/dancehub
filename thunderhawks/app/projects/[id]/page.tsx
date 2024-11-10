@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { ProjectT } from "@/src/API/project";
+import Project, { ProjectT } from "@/src/API/project";
 import { testProjects } from "@/src/testdata/testdata";
 import Link from "next/link";
 import { Input } from "@nextui-org/input";
@@ -18,10 +18,12 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import { VideoT } from "@/src/API/video";
+import Video, { VideoT } from "@/src/API/video";
 import VideoItem from "./video-item";
+import { UserContext } from "@/utils/user-context";
+import VideoInput from "@/components/videoInput";
 
-function Project({
+function ProjectPage({
   params,
 }: {
   params: {
@@ -34,19 +36,26 @@ function Project({
     onOpenChange: onCreateOpenChange,
     onClose: onCreateClose,
   } = useDisclosure();
-  const [project, setProject] = React.useState<ProjectT | null>(null);
+  const [project, setProject] = React.useState<Project | null>(null);
   const [warningMessage, setWarningMessage] = React.useState("");
   const [filterValue, setFilterValue] = React.useState("");
+  const [videos, setVideos] = React.useState<VideoT[]>([]);
+  const { user } = React.useContext(UserContext);
+  const [videoTitle, setVideoTitle] = React.useState("");
+  const [videoDescription, setVideoDescription] = React.useState("");
+  const [videoUrl, setVideoUrl] = React.useState("");
+  const [thumbnailUrl, setThumbnailUrl] = React.useState("");
 
   React.useEffect(() => {
-    setProject(
-      testProjects.find((project) => project.id === params.id) || null
-    );
-  }, [params.id]);
-
-  const videos = React.useMemo(() => {
-    return project?.videos || [];
-  }, [project]);
+    Project.getProject(params.id, user)
+      .then((project) => {
+        setProject(project);
+        setVideos(project.data.videos);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [params.id, user]);
 
   const onSearchChange = React.useCallback((value?: string) => {
     if (value) {
@@ -63,15 +72,44 @@ function Project({
   }, [videos, filterValue]);
 
   const deleteVideo = React.useCallback((id: string) => {
-    setProject((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        videos: prev.videos.filter((video) => video.id !== id),
-      };
-    });
-    // send delete request to server
+    setVideos(videos.filter((video) => video.id !== id));
   }, []);
+
+  const onVideoUploadHandler = React.useCallback(() => {
+    if (!videoTitle || !videoDescription || !videoUrl || !thumbnailUrl) {
+      setWarningMessage("Please fill out all fields");
+      return;
+    }
+    // create new video
+    // Project.createVideo(
+    Video.createVideo(
+      {
+        title: videoTitle,
+        description: videoDescription,
+        videoFile: new File([videoUrl], videoTitle),
+        videoThumbnail: new File([thumbnailUrl], videoTitle),
+        projectId: project?.data.id || "",
+      },
+      user
+    )
+      .then((video) => {
+        setVideos([...videos, video.data]);
+        onCreateClose();
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [
+    videoTitle,
+    videoDescription,
+    videoUrl,
+    thumbnailUrl,
+    project,
+    user,
+    videos,
+    setVideos,
+    onCreateClose,
+  ]);
 
   if (!project) {
     return <p>No project was found with this id</p>;
@@ -83,7 +121,7 @@ function Project({
       <div className="flex flex-row flex-wrap justify-between items-center gap-4 mb-3">
         <div className="flex flex-row justify-center items-center gap-4">
           <Link href="/dashboard/project" color="foreground">
-            <h1 className="text-xl font-bold">{project.title}</h1>
+            <h1 className="text-xl font-bold">{project.data.title}</h1>
           </Link>
           <div>
             <Input
@@ -111,8 +149,34 @@ function Project({
         </div>
         <Modal isOpen={isCreateOpen} onOpenChange={onCreateOpenChange}>
           <ModalContent>
-            <ModalHeader>{"Create a Video"} </ModalHeader>
-            <ModalBody>Video upload</ModalBody>
+            <ModalHeader>{"Upload a Video"} </ModalHeader>
+            <ModalBody>
+              <VideoInput
+                setThumbnailSource={setThumbnailUrl}
+                setVideoSource={setVideoUrl}
+                thumbnailSource={thumbnailUrl}
+                videoSource={videoUrl}
+              />
+              <Input
+                isRequired
+                label={"Title"}
+                type="text"
+                value={videoTitle}
+                onValueChange={setVideoTitle}
+              />
+              <Input
+                isRequired
+                label={"Description"}
+                type="text"
+                value={videoDescription}
+                onValueChange={setVideoDescription}
+              />
+              {warningMessage && (
+                <p className="text-red-500 text-xs text-start w-full">
+                  {warningMessage}
+                </p>
+              )}
+            </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={onCreateOpenChange}>
                 {"Cancel"}
@@ -120,7 +184,7 @@ function Project({
               <Button
                 color="primary"
                 variant="solid"
-                onPress={onCreateOpenChange}
+                onPress={onVideoUploadHandler}
               >
                 {"Create"}
               </Button>
@@ -138,4 +202,4 @@ function Project({
     </div>
   );
 }
-export default Project;
+export default ProjectPage;

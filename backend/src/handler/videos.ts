@@ -5,7 +5,6 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import fs from "fs/promises";
 
 async function GetVideo(req: Request, res: Response) {
-  // TODO: Get video from database
   const videoId = req.params.videoId;
   const version = req.query.version;
 
@@ -76,7 +75,6 @@ async function GetVideo(req: Request, res: Response) {
 }
 
 async function UploadVideo(req: Request, res: Response) {
-  // TODO: Implement actual video upload
   const { title, project, description } = req.body;
   const uploaderId = req.user!.id;
 
@@ -130,7 +128,6 @@ async function UploadVideo(req: Request, res: Response) {
 }
 
 async function UpdateVideo(req: Request, res: Response) {
-  // TODO: Update video file
   const videoId = req.params.videoId;
   const uploaderId = req.user!.id;
   const { title, description } = req.body;
@@ -195,7 +192,6 @@ async function UpdateVideo(req: Request, res: Response) {
 }
 
 async function DeleteVideo(req: Request, res: Response) {
-  // TODO: Delete video from file
   const videoId = req.params.videoId;
   const version = req.query.version;
   const user = req.user;
@@ -244,7 +240,6 @@ async function DeleteVideo(req: Request, res: Response) {
 }
 
 async function GetVideoList(req: Request, res: Response) {
-  // TODO: Get list of videos from database
   const projectId = req.params.projectId;
 
   const videosData = await pool.query<RowDataPacket[]>(

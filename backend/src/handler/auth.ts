@@ -35,14 +35,24 @@ async function Register(req: Request, res: Response) {
     return res.status(400).json({ message: "User already exists" });
   }
 
+  const profilePicture = req.file;
+  const imageUrl = profilePicture
+    ? `http://localhost:8000/static/images/${profilePicture.filename}`
+    : null;
+
   await pool.query<RowDataPacket[]>(
-    "INSERT INTO user (name, email, password, createdAt) VALUES (?, ?, ?, ?)",
-    [name, email, password, new Date()]
+    "INSERT INTO user (name, email, password, createdAt, profilePicture) VALUES (?, ?, ?, ?, ?)",
+    [name, email, password, new Date(), imageUrl]
+  );
+
+  const [newRows] = await pool.query<RowDataPacket[]>(
+    "SELECT * FROM user WHERE email = ?",
+    [email]
   );
 
   res.status(200).json({
     message: "User registered successfully",
-    token: generateToken({ id: rows[0].id, sub: name, email: email }),
+    token: generateToken({ id: newRows[0].id, sub: name, email: email }),
   });
 }
 

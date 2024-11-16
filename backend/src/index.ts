@@ -7,7 +7,7 @@ import * as comments from "./handler/comments";
 import * as auth from "./handler/auth";
 import * as projects from "./handler/projects";
 import { jwtMiddleware } from "./middleware/jwtMiddleware";
-import upload from "./middleware/upload";
+import { videoUpload, imageUpload } from "./middleware/upload";
 import cors from "cors";
 
 const app = express();
@@ -22,26 +22,35 @@ app.use(express.json());
 app.use("/static", express.static(path.join(__dirname, "static"), {}));
 
 // Auth API routes
-app.post("/api/auth/register", auth.Register);
+app.post(
+  "/api/auth/register",
+  imageUpload.single("profilePicture"),
+  auth.Register
+);
 app.post("/api/auth/login", auth.Login);
 app.post("/api/auth/logout", jwtMiddleware, auth.Logout);
 
 // User API routes
 app.get("/api/users/:userId", users.GetProfile);
-app.put("/api/users/:userId", users.UpdateProfile);
+app.put(
+  "/api/users/:userId",
+  imageUpload.single("profilePicture"),
+  jwtMiddleware,
+  users.UpdateProfile
+);
 
 // Video API routes
 app.get("/api/videos/:videoId", jwtMiddleware, videos.GetVideo);
 app.post(
   "/api/videos/",
   jwtMiddleware,
-  upload.single("videoFile"),
+  videoUpload.single("videoFile"),
   videos.UploadVideo
 );
 app.put(
   "/api/videos/:videoId",
   jwtMiddleware,
-  upload.single("videoFile"),
+  videoUpload.single("videoFile"),
   videos.UpdateVideo
 );
 app.delete("/api/videos/:videoId", jwtMiddleware, videos.DeleteVideo);

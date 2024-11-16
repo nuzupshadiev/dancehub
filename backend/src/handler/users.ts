@@ -4,7 +4,6 @@ import { pool } from "../database/db";
 import { RowDataPacket } from "mysql2";
 
 async function GetProfile(req: Request, res: Response) {
-  // TODO: Get user profile from database
   const userId = req.params.userId;
 
   const [user] = await pool.query<RowDataPacket[]>(
@@ -38,10 +37,15 @@ async function GetProfile(req: Request, res: Response) {
 }
 
 async function UpdateProfile(req: Request, res: Response) {
-  // TODO: Update user profile in database
   const userId = req.params.userId;
+  const user = req.user;
+  if (user!.id !== Number(userId)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
   let newProfile = req.body;
   newProfile.updatedAt = new Date();
+
   // if username is in request body, update it
   if (newProfile.username) {
     await pool.query<RowDataPacket[]>(`UPDATE user SET name = ? WHERE id = ?`, [
@@ -65,6 +69,14 @@ async function UpdateProfile(req: Request, res: Response) {
     await pool.query<RowDataPacket[]>(
       `UPDATE user SET profilePicture = ? WHERE id = ?`,
       [newProfile.profilePicture, userId]
+    );
+  }
+  if (req.file) {
+    const profilePicture = req.file;
+    const imageUrl = `http://localhost:8000/static/images/${profilePicture.filename}`;
+    await pool.query<RowDataPacket[]>(
+      `UPDATE user SET profilePicture = ? WHERE id = ?`,
+      [imageUrl, userId]
     );
   }
 

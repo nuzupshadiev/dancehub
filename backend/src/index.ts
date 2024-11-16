@@ -8,8 +8,12 @@ import * as auth from "./handler/auth";
 import * as projects from "./handler/projects";
 import { jwtMiddleware } from "./middleware/jwtMiddleware";
 import upload from "./middleware/upload";
+import cors from "cors";
 
 const app = express();
+
+// Allow cors
+app.use(cors);
 
 // Middleware to parse JSON requests
 app.use(express.json());

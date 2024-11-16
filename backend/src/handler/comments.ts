@@ -27,11 +27,14 @@ async function GetComments(req: Request, res: Response) {
   const version = new Date(versionString as string);
 
   const [commentsData] = await pool.query<RowDataPacket[]>(
-    `select * from comment
+    `select comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt from comment
     inner join user on comment.userId = user.id
     where videoId = ? and version = ?`,
     [videoId, version]
   );
+
+  console.log(version);
+  console.log(commentsData);
 
   let commentsResponse = [];
 
@@ -50,6 +53,32 @@ async function GetComments(req: Request, res: Response) {
         profileUrl: row.profilePicture,
       };
     });
+
+    // Fetch replies data for each comment
+    let replies = [];
+
+    const [repliesData] = await pool.query<RowDataPacket[]>(
+      `select * from reply
+      inner join user on reply.userId = user.id
+      where commentId = ?`,
+      [comment.id]
+    );
+
+    for (let reply of repliesData) {
+      replies.push({
+        id: reply.id,
+        commentId: reply.commentId,
+        user: {
+          id: reply.userId,
+          name: reply.name,
+          profileUrl: reply.profilePicture,
+        },
+        content: reply.content,
+        likes: 0,
+        modifiedAt: reply.modifiedAt,
+      });
+    }
+
     commentsResponse.push({
       id: comment.id,
       videoId: comment.videoId,
@@ -64,6 +93,7 @@ async function GetComments(req: Request, res: Response) {
       content: comment.content,
       likes: comment.likes,
       likedBy: likedBy,
+      replies: replies,
       modifiedAt: comment.modifiedAt,
     });
   }

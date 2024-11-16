@@ -43,6 +43,17 @@ create table comment(
     Foreign Key (videoId) REFERENCES video(id)
 )
 
+create table reply(
+    id int NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    commentId int COMMENT 'Video Id',
+    userId int COMMENT 'User Id',
+    content VARCHAR(255) COMMENT 'Content',
+    likes int COMMENT 'Likes',
+    modifiedAt DATETIME COMMENT 'Modified Time',
+    Foreign Key (userId) REFERENCES user(id),
+    Foreign Key (commentId) REFERENCES comment(id)
+)
+
 CREATE TABLE likes(
     userId int COMMENT 'User Id',
     commentId int COMMENT 'Commend Id',

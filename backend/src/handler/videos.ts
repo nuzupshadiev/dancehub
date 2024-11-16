@@ -32,33 +32,59 @@ async function GetVideo(req: Request, res: Response) {
   const versions = versionsRows.map((row) => row.version);
 
   const [commentsData] = await pool.query<RowDataPacket[]>(
-    "SELECT * FROM comment WHERE videoId = ?",
-    [videoId]
+    "SELECT * FROM comment WHERE videoId = ? and version = ?",
+    [videoId, video.version]
   );
   let comments = [];
-  for (const row of commentsData) {
+  for (const comment of commentsData) {
     const [commenterData] = await pool.query<RowDataPacket[]>(
       "SELECT * FROM user WHERE id = ?",
-      [row.userId]
+      [comment.userId]
     );
     const commenter = commenterData[0];
 
+    let replies = [];
+
+    const [repliesData] = await pool.query<RowDataPacket[]>(
+      `select * from reply
+      inner join user on reply.userId = user.id
+      where commentId = ?`,
+      [comment.id]
+    );
+
+    for (let reply of repliesData) {
+      replies.push({
+        id: reply.id,
+        commentId: reply.commentId,
+        user: {
+          id: reply.userId,
+          name: reply.name,
+          profileUrl: reply.profilePicture,
+        },
+        content: reply.content,
+        likes: 0,
+        modifiedAt: reply.modifiedAt,
+      });
+    }
+
     comments.push({
-      id: row.id,
-      content: row.content,
-      start: row.start,
-      end: row.end,
-      commenter: {
+      id: comment.id,
+      content: comment.content,
+      start: comment.start,
+      end: comment.end,
+      user: {
         id: commenter.id,
         name: commenter.name,
         profileUrl: commenter.profilePicture,
       },
+      replies,
     });
   }
 
   const videoResponse = {
     id: video.id,
     title: video.title,
+    version: video.version,
     description: video.description,
     uploader: {
       id: video.uploaderId,

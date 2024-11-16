@@ -6,6 +6,7 @@ import * as videos from "./handler/videos";
 import * as comments from "./handler/comments";
 import * as auth from "./handler/auth";
 import * as projects from "./handler/projects";
+import * as replies from "./handler/replies";
 import { jwtMiddleware } from "./middleware/jwtMiddleware";
 import { videoUpload, imageUpload } from "./middleware/upload";
 import cors from "cors";
@@ -68,6 +69,23 @@ app.delete(
   "/api/videos/:videoId/comments/:commentId",
   jwtMiddleware,
   comments.DeleteComment
+);
+
+// Replies API routes
+app.post(
+  "/api/videos/:videoId/comments/:commentId/replies",
+  jwtMiddleware,
+  replies.AddReply
+);
+app.put(
+  "/api/videos/:videoId/comments/:commentId/replies/:replyId",
+  jwtMiddleware,
+  replies.UpdateReply
+);
+app.delete(
+  "/api/videos/:videoId/comments/:commentId/replies/:replyId",
+  jwtMiddleware,
+  replies.DeleteReply
 );
 
 // Projects API routes

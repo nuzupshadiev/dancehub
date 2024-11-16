@@ -56,6 +56,8 @@ app.put(
 );
 app.delete("/api/videos/:videoId", jwtMiddleware, videos.DeleteVideo);
 app.get("/api/videos/list/:projectId", videos.GetVideoList);
+app.post("/api/videos/:videoId/like", jwtMiddleware, videos.LikeVideo);
+app.post("/api/videos/:videoId/unlike", jwtMiddleware, videos.UnlikeVideo);
 
 // Comments API routes
 app.get("/api/videos/:videoId/comments", comments.GetComments);
@@ -69,6 +71,16 @@ app.delete(
   "/api/videos/:videoId/comments/:commentId",
   jwtMiddleware,
   comments.DeleteComment
+);
+app.post(
+  "/api/videos/:videoId/comments/:commentId/like",
+  jwtMiddleware,
+  comments.LikeComment
+);
+app.post(
+  "/api/videos/:videoId/comments/:commentId/unlike",
+  jwtMiddleware,
+  comments.UnlikeComment
 );
 
 // Replies API routes
@@ -86,6 +98,16 @@ app.delete(
   "/api/videos/:videoId/comments/:commentId/replies/:replyId",
   jwtMiddleware,
   replies.DeleteReply
+);
+app.post(
+  "/api/videos/:videoId/comments/:commentId/replies/:replyId/like",
+  jwtMiddleware,
+  replies.LikeReply
+);
+app.post(
+  "/api/videos/:videoId/comments/:commentId/replies/:replyId/unlike",
+  jwtMiddleware,
+  replies.UnlikeReply
 );
 
 // Projects API routes

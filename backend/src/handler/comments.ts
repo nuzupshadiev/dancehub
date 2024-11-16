@@ -41,8 +41,8 @@ async function GetComments(req: Request, res: Response) {
   // Fetch likedBy data for each comment
   for (let comment of commentsData) {
     const [likesData] = await pool.query<RowDataPacket[]>(
-      `select * from likes
-      inner join user on likes.userId = user.id
+      `select * from comment_likes
+      inner join user on comment_likes.userId = user.id
       where commentId = ?`,
       [comment.id]
     );
@@ -218,8 +218,8 @@ async function UpdateComment(req: Request, res: Response) {
   const comment = updatedCommentData[0];
 
   const [likedByData] = await pool.query<RowDataPacket[]>(
-    `select * from likes
-    inner join user on likes.userId = user.id
+    `select * from comment_likes
+    inner join user on comment_likes.userId = user.id
     where commentId = ?`,
     [commentId]
   );
@@ -288,9 +288,10 @@ async function DeleteComment(req: Request, res: Response) {
   }
 
   // delete likes
-  await pool.query<ResultSetHeader>("delete from likes where commentId = ?", [
-    commentId,
-  ]);
+  await pool.query<ResultSetHeader>(
+    "delete from comment_likes where commentId = ?",
+    [commentId]
+  );
 
   // delete comment
   const [resultData] = await pool.query<ResultSetHeader>(
@@ -306,4 +307,98 @@ async function DeleteComment(req: Request, res: Response) {
   res.json({ message: "Comment deleted successfully" });
 }
 
-export { GetComments, AddComment, UpdateComment, DeleteComment };
+async function LikeComment(req: Request, res: Response) {
+  const commentId = req.params.commentId;
+  const userId = req.user!.id;
+
+  const [commentData] = await pool.query<RowDataPacket[]>(
+    "select * from comment where id = ?",
+    [commentId]
+  );
+
+  if (commentData.length === 0) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+
+  const [likeData] = await pool.query<RowDataPacket[]>(
+    "select * from comment_likes where commentId = ? and userId = ?",
+    [commentId, userId]
+  );
+
+  if (likeData.length > 0) {
+    return res.status(400).json({ message: "Already liked" });
+  }
+
+  const [resultData] = await pool.query<ResultSetHeader>(
+    "insert into comment_likes (commentId, userId) values (?, ?)",
+    [commentId, userId]
+  );
+
+  const insertId = resultData.insertId;
+  const affectedRows = resultData.affectedRows;
+
+  if (affectedRows === 0) {
+    return res.status(500).json({ message: "Failed to like comment" });
+  }
+
+  await pool.query<ResultSetHeader>(
+    "update comment set likes = likes + 1 where id = ?",
+    [commentId]
+  );
+
+  res.json({ message: "Comment liked successfully" });
+}
+
+async function UnlikeComment(req: Request, res: Response) {
+  const commentId = req.params.commentId;
+  const userId = req.user!.id;
+
+  const [commentData] = await pool.query<RowDataPacket[]>(
+    "select * from comment where id = ?",
+    [commentId]
+  );
+
+  if (commentData.length === 0) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+
+  const [likeData] = await pool.query<RowDataPacket[]>(
+    "select * from comment_likes where commentId = ? and userId = ?",
+    [commentId, userId]
+  );
+
+  if (likeData.length === 0) {
+    return res.status(400).json({ message: "Already unliked" });
+  }
+
+  const [removalData] = await pool.query<ResultSetHeader>(
+    "DELETE FROM comment_likes where commentId = ? and userId = ?",
+    [commentId, userId]
+  );
+
+  const affectedRows = removalData.affectedRows;
+
+  if (affectedRows === 0) {
+    return res.status(500).json({ message: "Failed to like comment" });
+  }
+
+  const [resultData] = await pool.query<ResultSetHeader>(
+    "update comment set likes = likes + 1 where id = ?",
+    [commentId]
+  );
+
+  if (resultData.affectedRows === 0) {
+    return res.status(500).json({ message: "Failed to unlike comment" });
+  }
+
+  res.json({ message: "Comment liked successfully" });
+}
+
+export {
+  GetComments,
+  AddComment,
+  UpdateComment,
+  DeleteComment,
+  LikeComment,
+  UnlikeComment,
+};

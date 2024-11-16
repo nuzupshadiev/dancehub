@@ -117,4 +117,90 @@ async function DeleteReply(req: Request, res: Response) {
   res.json({ message: "Reply deleted successfully" });
 }
 
-export { AddReply, UpdateReply, DeleteReply };
+async function LikeReply(req: Request, res: Response) {
+  const { videoId, commentId, replyId } = req.params;
+  const userId = req.user!.id;
+
+  const [replyData] = await pool.query<RowDataPacket[]>(
+    "select * from reply where id = ? and commentId = ?",
+    [replyId, commentId]
+  );
+
+  if (replyData.length === 0) {
+    return res.status(404).json({ message: "Reply not found" });
+  }
+
+  const [likeData] = await pool.query<RowDataPacket[]>(
+    "select * from reply_likes where userId = ? and replyId = ?",
+    [userId, replyId]
+  );
+
+  if (likeData.length > 0) {
+    return res.status(400).json({ message: "Reply already liked" });
+  }
+
+  const [insertData] = await pool.query<ResultSetHeader>(
+    "insert into reply_likes (userId, replyId) values (?, ?)",
+    [userId, replyId]
+  );
+
+  if (insertData.affectedRows === 0) {
+    return res.status(500).json({ message: "Failed to like reply" });
+  }
+
+  const [resultData] = await pool.query<ResultSetHeader>(
+    "update reply set likes = likes + 1 where id = ?",
+    [replyId]
+  );
+
+  if (resultData.affectedRows === 0) {
+    return res.status(500).json({ message: "Failed to like reply" });
+  }
+
+  res.json({ message: "Reply liked successfully" });
+}
+
+async function UnlikeReply(req: Request, res: Response) {
+  const { videoId, commentId, replyId } = req.params;
+  const userId = req.user!.id;
+
+  const [replyData] = await pool.query<RowDataPacket[]>(
+    "select * from reply where id = ? and commentId = ?",
+    [replyId, commentId]
+  );
+
+  if (replyData.length === 0) {
+    return res.status(404).json({ message: "Reply not found" });
+  }
+
+  const [likeData] = await pool.query<RowDataPacket[]>(
+    "select * from reply_likes where userId = ? and replyId = ?",
+    [userId, replyId]
+  );
+
+  if (likeData.length === 0) {
+    return res.status(400).json({ message: "Reply not liked" });
+  }
+
+  const [deleteData] = await pool.query<ResultSetHeader>(
+    "delete from reply_likes where userId = ? and replyId = ?",
+    [userId, replyId]
+  );
+
+  if (deleteData.affectedRows === 0) {
+    return res.status(500).json({ message: "Failed to unlike reply" });
+  }
+
+  const [resultData] = await pool.query<ResultSetHeader>(
+    "update reply set likes = likes - 1 where id = ?",
+    [replyId]
+  );
+
+  if (resultData.affectedRows === 0) {
+    return res.status(500).json({ message: "Failed to unlike reply" });
+  }
+
+  res.json({ message: "Reply unliked successfully" });
+}
+
+export { AddReply, UpdateReply, DeleteReply, LikeReply, UnlikeReply };

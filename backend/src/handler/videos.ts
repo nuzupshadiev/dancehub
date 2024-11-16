@@ -3,6 +3,7 @@ import { Video, sampleVideo } from "../interfaces/Video";
 import { pool } from "../database/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import fs from "fs/promises";
+import { version } from "os";
 
 async function GetVideo(req: Request, res: Response) {
   const videoId = req.params.videoId;
@@ -32,7 +33,9 @@ async function GetVideo(req: Request, res: Response) {
   const versions = versionsRows.map((row) => row.version);
 
   const [commentsData] = await pool.query<RowDataPacket[]>(
-    "SELECT * FROM comment WHERE videoId = ? and version = ?",
+    `select comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt from comment
+    inner join user on comment.userId = user.id
+    where videoId = ? and version = ?`,
     [videoId, video.version]
   );
   let comments = [];
@@ -46,7 +49,7 @@ async function GetVideo(req: Request, res: Response) {
     let replies = [];
 
     const [repliesData] = await pool.query<RowDataPacket[]>(
-      `select * from reply
+      `select reply.id as id, commentId, userId, name, profilePicture, content, reply.modifiedAt as modifiedAt, likes from reply
       inner join user on reply.userId = user.id
       where commentId = ?`,
       [comment.id]
@@ -62,7 +65,7 @@ async function GetVideo(req: Request, res: Response) {
           profileUrl: reply.profilePicture,
         },
         content: reply.content,
-        likes: 0,
+        likes: reply.likes,
         modifiedAt: reply.modifiedAt,
       });
     }
@@ -283,4 +286,122 @@ async function GetVideoList(req: Request, res: Response) {
   res.json({ totalVideos: videos.length, project: projectId, videos });
 }
 
-export { GetVideo, UploadVideo, UpdateVideo, DeleteVideo, GetVideoList };
+async function LikeVideo(req: Request, res: Response) {
+  const videoId = req.params.videoId;
+  let versionString = req.query.version;
+  const userId = req.user!.id;
+
+  if (!versionString) {
+    const [versionData] = await pool.query<RowDataPacket[]>(
+      "SELECT version FROM video WHERE id = ? ORDER BY version DESC LIMIT 1",
+      [videoId]
+    );
+    if (versionData.length === 0) {
+      return res.status(404).json({ message: "Video not found" });
+    }
+    versionString = versionData[0].version;
+  }
+  const version = new Date(versionString as string);
+
+  const [videoData] = await pool.query<RowDataPacket[]>(
+    "SELECT * FROM video WHERE id = ? and version = ?",
+    [videoId, version]
+  );
+
+  if (videoData.length === 0) {
+    return res.status(404).json({ message: "Video not found" });
+  }
+
+  const [likeData] = await pool.query<RowDataPacket[]>(
+    "SELECT * FROM video_likes WHERE videoId = ? AND userId = ?",
+    [videoId, userId]
+  );
+
+  if (likeData.length > 0) {
+    return res.status(400).json({ message: "Already liked" });
+  }
+
+  const [insertionData] = await pool.query<ResultSetHeader>(
+    "INSERT INTO video_likes (videoId, userId, version) VALUES (?, ?, ?)",
+    [videoId, userId, version]
+  );
+  if (insertionData.affectedRows === 0) {
+    return res.status(500).json({ message: "Error liking video" });
+  }
+
+  const [updateData] = await pool.query<ResultSetHeader>(
+    "UPDATE video SET likes = likes + 1 WHERE id = ?",
+    [videoId]
+  );
+
+  if (updateData.affectedRows === 0) {
+    return res.status(500).json({ message: "Error liking video" });
+  }
+
+  res.json({ message: "Video liked successfully" });
+}
+
+async function UnlikeVideo(req: Request, res: Response) {
+  const videoId = req.params.videoId;
+  let versionString = req.query.version;
+  const userId = req.user!.id;
+
+  if (!versionString) {
+    const [versionData] = await pool.query<RowDataPacket[]>(
+      "SELECT version FROM video WHERE id = ? ORDER BY version DESC LIMIT 1",
+      [videoId]
+    );
+    if (versionData.length === 0) {
+      return res.status(404).json({ message: "Video not found" });
+    }
+    versionString = versionData[0].version;
+  }
+  const version = new Date(versionString as string);
+
+  const [videoData] = await pool.query<RowDataPacket[]>(
+    "SELECT * FROM video WHERE id = ? and version = ?",
+    [videoId, version]
+  );
+
+  if (videoData.length === 0) {
+    return res.status(404).json({ message: "Video not found" });
+  }
+
+  const [likeData] = await pool.query<RowDataPacket[]>(
+    "SELECT * FROM video_likes WHERE videoId = ? AND userId = ?",
+    [videoId, userId]
+  );
+
+  if (likeData.length === 0) {
+    return res.status(400).json({ message: "Already unliked" });
+  }
+
+  const [removalData] = await pool.query<ResultSetHeader>(
+    "DELETE FROM video_likes WHERE videoId = ? AND userId = ? and version = ?",
+    [videoId, userId, version]
+  );
+  if (removalData.affectedRows === 0) {
+    return res.status(500).json({ message: "Error unliking video" });
+  }
+
+  const [resultData] = await pool.query<ResultSetHeader>(
+    "UPDATE video SET likes = likes - 1 WHERE id = ? and version = ?",
+    [videoId, version]
+  );
+
+  if (resultData.affectedRows === 0) {
+    return res.status(500).json({ message: "Error unliking video" });
+  }
+
+  res.json({ message: "Video unliked successfully" });
+}
+
+export {
+  GetVideo,
+  UploadVideo,
+  UpdateVideo,
+  DeleteVideo,
+  GetVideoList,
+  LikeVideo,
+  UnlikeVideo,
+};

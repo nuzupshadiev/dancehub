@@ -29,6 +29,15 @@ CREATE TABLE video(
     primary key (id, version)
 ) COMMENT '';
 
+CREATE TABLE video_likes(
+    userId int COMMENT 'User Id',
+    videoId int COMMENT 'Video Id',
+    version datetime COMMENT 'Version',
+    Foreign Key (userId) REFERENCES user(id),
+    Foreign Key (videoId) REFERENCES video(id),
+    primary key (userId, videoId, version)
+) COMMENT '';
+
 create table comment(
     id int NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
     videoId int COMMENT 'Video Id',
@@ -43,6 +52,14 @@ create table comment(
     Foreign Key (videoId) REFERENCES video(id)
 )
 
+CREATE TABLE comment_likes(
+    userId int COMMENT 'User Id',
+    commentId int COMMENT 'Comment Id',
+    Foreign Key (userId) REFERENCES user(id),
+    Foreign Key (commentId) REFERENCES comment(id),
+    primary key (userId, commentId)
+) COMMENT '';
+
 create table reply(
     id int NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
     commentId int COMMENT 'Video Id',
@@ -54,12 +71,12 @@ create table reply(
     Foreign Key (commentId) REFERENCES comment(id)
 )
 
-CREATE TABLE likes(
+CREATE TABLE reply_likes(
     userId int COMMENT 'User Id',
-    commentId int COMMENT 'Commend Id',
+    replyId int COMMENT 'Reply Id',
     Foreign Key (userId) REFERENCES user(id),
-    Foreign Key (commentId) REFERENCES comment(id),
-    primary key (userId, commentId)
+    Foreign Key (replyId) REFERENCES reply(id),
+    primary key (userId, replyId)
 ) COMMENT '';
 
 create table member(

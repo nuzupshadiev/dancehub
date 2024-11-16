@@ -13,7 +13,7 @@ import cors from "cors";
 const app = express();
 
 // Allow cors
-app.use(cors);
+app.use(cors());
 
 // Middleware to parse JSON requests
 app.use(express.json());

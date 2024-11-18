@@ -50,6 +50,10 @@ async function Register(req: Request, res: Response) {
     [email]
   );
 
+  if (newRows.length === 0) {
+    return res.status(500).json({ message: "Failed to register user" });
+  }
+
   res.status(200).json({
     message: "User registered successfully",
     token: generateToken({ id: newRows[0].id, sub: name, email: email }),

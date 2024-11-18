@@ -34,7 +34,7 @@ CREATE TABLE video_likes(
     videoId int COMMENT 'Video Id',
     version datetime COMMENT 'Version',
     Foreign Key (userId) REFERENCES user(id),
-    Foreign Key (videoId) REFERENCES video(id),
+    Foreign Key (videoId, version) REFERENCES video(id, version),
     primary key (userId, videoId, version)
 ) COMMENT '';
 
@@ -49,8 +49,8 @@ create table comment(
     likes int COMMENT 'Likes',
     modifiedAt DATETIME COMMENT 'Modified Time',
     Foreign Key (userId) REFERENCES user(id),
-    Foreign Key (videoId) REFERENCES video(id)
-)
+    Foreign Key (videoId, version) REFERENCES video(id, version)
+);
 
 CREATE TABLE comment_likes(
     userId int COMMENT 'User Id',
@@ -69,7 +69,7 @@ create table reply(
     modifiedAt DATETIME COMMENT 'Modified Time',
     Foreign Key (userId) REFERENCES user(id),
     Foreign Key (commentId) REFERENCES comment(id)
-)
+);
 
 CREATE TABLE reply_likes(
     userId int COMMENT 'User Id',
@@ -85,6 +85,4 @@ create table member(
     projectId int COMMENT 'Project Id',
     Foreign Key (userId) REFERENCES user(id),
     Foreign Key (projectId) REFERENCES project(id)
-)
-
-ALTER TABLE likes ADD UNIQUE KEY unique_user_comment (userId, commentId);
+);

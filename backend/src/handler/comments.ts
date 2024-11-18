@@ -19,7 +19,7 @@ async function GetComments(req: Request, res: Response) {
       "select version from video where id = ? order by version desc limit 1",
       [videoId]
     );
-    if (versionData.length === 0) {
+    if (versionData.length === 0 || versionData[0] === undefined) {
       return res.status(404).json({ message: "Video not found" });
     }
     versionString = versionData[0].version;
@@ -113,7 +113,7 @@ async function AddComment(req: Request, res: Response) {
       "select version from video where id = ? order by version desc limit 1",
       [videoId]
     );
-    if (versionData.length === 0) {
+    if (versionData.length === 0 || versionData[0] === undefined) {
       return res.status(404).json({ message: "Video not found" });
     }
     versionString = versionData[0].version;
@@ -137,7 +137,7 @@ async function AddComment(req: Request, res: Response) {
     [insertId]
   );
 
-  if (commentData.length === 0) {
+  if (commentData.length === 0 || commentData[0] === undefined) {
     return res
       .status(404)
       .json({ message: "Comment generated, but not found" });
@@ -173,7 +173,7 @@ async function UpdateComment(req: Request, res: Response) {
     [commentId]
   );
 
-  if (commentData.length === 0) {
+  if (commentData.length === 0 || commentData[0] === undefined) {
     return res.status(404).json({ message: "Comment not found" });
   }
 
@@ -190,7 +190,7 @@ async function UpdateComment(req: Request, res: Response) {
     [videoId]
   );
 
-  if (videoData.length === 0) {
+  if (videoData.length === 0 || videoData[0] === undefined) {
     return res.status(404).json({ message: "Video not found" });
   }
 
@@ -265,7 +265,7 @@ async function DeleteComment(req: Request, res: Response) {
     [commentId, videoId]
   );
 
-  if (commentData.length === 0) {
+  if (commentData.length === 0 || commentData[0] === undefined) {
     return res.status(404).json({ message: "Comment not found" });
   }
   const comment = commentData[0];
@@ -277,7 +277,7 @@ async function DeleteComment(req: Request, res: Response) {
       where video.id = ?`,
     [videoId]
   );
-  if (videoData.length === 0) {
+  if (videoData.length === 0 || videoData[0] === undefined) {
     return res.status(404).json({ message: "Video not found" });
   }
   const administratorId = videoData[0].administratorId;
@@ -316,7 +316,7 @@ async function LikeComment(req: Request, res: Response) {
     [commentId]
   );
 
-  if (commentData.length === 0) {
+  if (commentData.length === 0 || commentData[0] === undefined) {
     return res.status(404).json({ message: "Comment not found" });
   }
 
@@ -358,7 +358,7 @@ async function UnlikeComment(req: Request, res: Response) {
     [commentId]
   );
 
-  if (commentData.length === 0) {
+  if (commentData.length === 0 || commentData[0] === undefined) {
     return res.status(404).json({ message: "Comment not found" });
   }
 
@@ -367,7 +367,7 @@ async function UnlikeComment(req: Request, res: Response) {
     [commentId, userId]
   );
 
-  if (likeData.length === 0) {
+  if (likeData.length === 0 || likeData[0] === undefined) {
     return res.status(400).json({ message: "Already unliked" });
   }
 

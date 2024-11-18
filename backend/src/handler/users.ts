@@ -10,7 +10,7 @@ async function GetProfile(req: Request, res: Response) {
     "SELECT id, name, email, profilePicture, createdAt FROM user WHERE id = ?",
     [userId]
   );
-  if (user.length === 0) {
+  if (user.length === 0 || user[0] === undefined) {
     res.status(404).json({ message: "User not found" });
   }
 

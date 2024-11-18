@@ -12,7 +12,7 @@ async function Login(req: Request, res: Response) {
     "SELECT * FROM user WHERE email = ? AND password = ?",
     [email, password]
   );
-  if (rows.length === 0) {
+  if (rows.length === 0 || rows[0] === undefined) {
     res.status(401).json({ message: "Invalid credentials" });
   }
   res.status(200).json({
@@ -50,7 +50,7 @@ async function Register(req: Request, res: Response) {
     [email]
   );
 
-  if (newRows.length === 0) {
+  if (newRows.length === 0 || newRows[0] === undefined) {
     return res.status(500).json({ message: "Failed to register user" });
   }
 

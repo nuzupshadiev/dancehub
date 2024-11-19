@@ -33,6 +33,7 @@ app.post("/api/auth/logout", jwtMiddleware, auth.Logout);
 
 // User API routes
 app.get("/api/users/:userId", users.GetProfile);
+app.get("/api/users", jwtMiddleware, users.GetProfile);
 app.put(
   "/api/users/:userId",
   imageUpload.single("profilePicture"),

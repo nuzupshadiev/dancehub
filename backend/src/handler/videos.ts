@@ -283,7 +283,23 @@ async function GetVideoList(req: Request, res: Response) {
     thumbnailUrl: video.thumbnailUrl || "",
   }));
 
-  res.json({ totalVideos: videos.length, project: projectId, videos });
+  const [projectData] = await pool.query<RowDataPacket[]>(
+    "SELECT title FROM project WHERE id = ?",
+    [projectId]
+  );
+
+  if (projectData.length === 0) {
+    return res.status(404).json({ message: "Project not found" });
+  }
+
+  const title = projectData[0].title;
+
+  res.json({
+    totalVideos: videos.length,
+    project: projectId,
+    title,
+    videos,
+  });
 }
 
 async function LikeVideo(req: Request, res: Response) {

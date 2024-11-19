@@ -35,7 +35,11 @@ async function GetUserInfo(userId: number) {
 }
 
 async function GetProfile(req: Request, res: Response) {
-  const userId = req.params.userId;
+  let userId = req.params.userId;
+
+  if (!userId) {
+    userId = req.user!.id.toString();
+  }
 
   const [user] = await pool.query<RowDataPacket[]>(
     "SELECT id, name, email, profilePicture, createdAt FROM user WHERE id = ?",
@@ -111,10 +115,10 @@ async function UpdateProfile(req: Request, res: Response) {
     );
   }
 
-  const [result] = await pool.query<RowDataPacket[]>(
-    "SELECT id, name, email, profilePicture, createdAt FROM user WHERE id = ?",
-    [userId]
-  );
+  const result = await GetUserInfo(parseInt(userId));
+  if (result === null) {
+    return res.status(500).json({ message: "Failed to fetch user" });
+  }
   res.json(result);
 }
 

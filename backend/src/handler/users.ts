@@ -3,15 +3,13 @@ import { User, sampleUser } from "../interfaces/User";
 import { pool } from "../database/db";
 import { RowDataPacket } from "mysql2";
 
-async function GetProfile(req: Request, res: Response) {
-  const userId = req.params.userId;
-
+async function GetUserInfo(userId: number) {
   const [user] = await pool.query<RowDataPacket[]>(
     "SELECT id, name, email, profilePicture, createdAt FROM user WHERE id = ?",
     [userId]
   );
-  if (user.length === 0) {
-    res.status(404).json({ message: "User not found" });
+  if (user.length === 0 || user[0] === undefined) {
+    return null;
   }
 
   const [projectIds] = await pool.query(
@@ -28,12 +26,28 @@ async function GetProfile(req: Request, res: Response) {
         where project.id = ?;`,
       [id]
     );
-    console.log(project[0]);
     if (project.length > 0) {
       projects.push(project[0]);
     }
   }
-  res.json({ ...user[0], projects });
+
+  return { ...user[0], projects };
+}
+
+async function GetProfile(req: Request, res: Response) {
+  let userId = req.params.userId;
+
+  if (!userId) {
+    userId = req.user!.id.toString();
+  }
+
+  const user = await GetUserInfo(parseInt(userId));
+
+  if (user === null) {
+    return res.status(500).json({ message: "Failed to fetch user" });
+  }
+
+  res.json({ user: { ...user } });
 }
 
 async function UpdateProfile(req: Request, res: Response) {
@@ -73,18 +87,25 @@ async function UpdateProfile(req: Request, res: Response) {
   }
   if (req.file) {
     const profilePicture = req.file;
-    const imageUrl = `http://localhost:8000/static/images/${profilePicture.filename}`;
+    const imageUrl = `http://34.170.203.67:8000/static/images/${profilePicture.filename}`;
     await pool.query<RowDataPacket[]>(
       `UPDATE user SET profilePicture = ? WHERE id = ?`,
       [imageUrl, userId]
     );
   }
 
-  const [result] = await pool.query<RowDataPacket[]>(
-    "SELECT id, name, email, profilePicture, createdAt FROM user WHERE id = ?",
-    [userId]
-  );
+  const result = await GetUserInfo(parseInt(userId));
+  if (result === null) {
+    return res.status(500).json({ message: "Failed to fetch user" });
+  }
   res.json(result);
 }
 
-export { GetProfile, UpdateProfile };
+async function GetAllUsers(req: Request, res: Response) {
+  const [users] = await pool.query<RowDataPacket[]>(
+    "SELECT id, name, email, password, profilePicture, createdAt FROM user"
+  );
+  res.json({ users });
+}
+
+export { GetProfile, UpdateProfile, GetUserInfo, GetAllUsers };

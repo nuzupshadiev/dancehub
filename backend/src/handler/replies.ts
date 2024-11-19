@@ -12,7 +12,7 @@ async function AddReply(req: Request, res: Response) {
     [commentId, videoId]
   );
 
-  if (commentData.length === 0) {
+  if (commentData.length === 0 || commentData[0] === undefined) {
     return res.status(404).json({ message: "Comment not found" });
   }
 
@@ -60,7 +60,7 @@ async function UpdateReply(req: Request, res: Response) {
     [replyId, commentId]
   );
 
-  if (replyData.length === 0) {
+  if (replyData.length === 0 || replyData[0] === undefined) {
     return res.status(404).json({ message: "Reply not found" });
   }
 
@@ -97,7 +97,7 @@ async function DeleteReply(req: Request, res: Response) {
     [replyId, commentId]
   );
 
-  if (replyData.length === 0) {
+  if (replyData.length === 0 || replyData[0] === undefined) {
     return res.status(404).json({ message: "Reply not found" });
   }
 
@@ -126,7 +126,7 @@ async function LikeReply(req: Request, res: Response) {
     [replyId, commentId]
   );
 
-  if (replyData.length === 0) {
+  if (replyData.length === 0 || replyData[0] === undefined) {
     return res.status(404).json({ message: "Reply not found" });
   }
 
@@ -169,7 +169,7 @@ async function UnlikeReply(req: Request, res: Response) {
     [replyId, commentId]
   );
 
-  if (replyData.length === 0) {
+  if (replyData.length === 0 || replyData[0] === undefined) {
     return res.status(404).json({ message: "Reply not found" });
   }
 
@@ -178,7 +178,7 @@ async function UnlikeReply(req: Request, res: Response) {
     [userId, replyId]
   );
 
-  if (likeData.length === 0) {
+  if (likeData.length === 0 || likeData[0] === undefined) {
     return res.status(400).json({ message: "Reply not liked" });
   }
 

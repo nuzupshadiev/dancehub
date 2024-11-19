@@ -55,13 +55,13 @@ async function GetProjects(req: Request, res: Response) {
         title: row.title,
         description: row.description,
         videoUrl: row.videoUrl,
-        thumbnailUrl: row.thumbnailUrl,
         createdAt: row.createdAt,
       };
     });
 
     projects.push({
       id: project.id,
+      title: project.title,
       name: project.name,
       description: project.description,
       administrator: administrator,
@@ -183,7 +183,6 @@ async function UpdateProject(req: Request, res: Response) {
       title: row.title,
       description: row.description,
       videoUrl: row.videoUrl,
-      thumbnailUrl: row.thumbnailUrl,
       createdAt: row.createdAt,
     };
   });

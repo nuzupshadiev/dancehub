@@ -1,10 +1,10 @@
 import { Card, CardBody, CardHeader, User } from "@nextui-org/react";
 import { useState } from "react";
 
-import { VideoT } from "@/src/API/video";
+import Video, { VideoT } from "@/src/API/video";
 
 interface DescriptionSectionProps {
-  video: VideoT;
+  video: Video;
 }
 
 export default function DescriptionSection({ video }: DescriptionSectionProps) {
@@ -12,7 +12,7 @@ export default function DescriptionSection({ video }: DescriptionSectionProps) {
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
-  const description = video.description;
+  const description = video.data.description;
   const previewText = description.slice(0, 150) + "...";
 
   return (
@@ -20,10 +20,10 @@ export default function DescriptionSection({ video }: DescriptionSectionProps) {
       <CardHeader>
         <User
           avatarProps={{
-            src: video.uploader.profilePicture,
+            src: video.data.uploader.profileUrl,
           }}
-          description={video.uploader.username}
-          name={video.uploader.name}
+          description={video.data.uploader.name}
+          name={video.data.uploader.name}
         />
       </CardHeader>
       <CardBody className="flex flex-row">

@@ -1,56 +1,68 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { Input, Button, Avatar } from "@nextui-org/react";
 
 import Comment from "./comment";
 
 import TimeInput from "@/components/timeinput";
-import { CommentT } from "@/src/API/video";
+import Video, { CommentT } from "@/src/API/video";
+import { UserContext } from "@/utils/user-context";
 
 interface CommentsSectionProps {
-  comments: Array<CommentT>;
+  video: Video;
 }
-export default function CommentsSection({ comments }: CommentsSectionProps) {
-  const [commentsList, setCommentsList] = useState<Array<CommentT>>(comments);
+export default function CommentsSection({ video }: CommentsSectionProps) {
+  const [commentsList, setCommentsList] = useState<Array<CommentT>>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [startMinutes, setStartMinutes] = useState("");
   const [startSeconds, setStartSeconds] = useState("");
   const [endMinutes, setEndMinutes] = useState("");
   const [endSeconds, setEndSeconds] = useState("");
+  const { user } = React.useContext(UserContext);
   const handleCancel = React.useCallback(() => {
     setCommentText("");
     setIsTyping(false);
   }, []);
+
+  useEffect(() => {
+    Video.getComments(video.data.id, user).then((comments) => {
+      setCommentsList(comments);
+    });
+  }, [video.data.id, user]);
+
   const handleCommentSubmit = React.useCallback(() => {
-    setCommentsList((prev) => [
-      ...prev,
+    if (
+      startMinutes === "" ||
+      startSeconds === "" ||
+      endMinutes === "" ||
+      endSeconds === "" ||
+      commentText === "" ||
+      !user
+    ) {
+      return;
+    }
+    Video.leaveComment(
       {
+        start: `${Number(startMinutes)}:${Number(startSeconds)}`,
+        end: `${Number(endMinutes)}:${Number(endSeconds)}`,
         content: commentText,
-        end: `${endMinutes}:${endSeconds}`,
-        id: Math.random().toString(),
-        likedBy: [],
-        likes: 0,
-        modifiedAt: new Date().toISOString(),
-        start: `${startMinutes}:${startSeconds}`,
-        user: {
-          id: "1",
-          profilePicture: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
-          username: "John Doe",
-          name: "John Doe",
-        },
-        version: "1",
-        videoId: "1",
       },
-    ]);
+      video.data.id,
+      user
+    ).then((comment) => {
+      setCommentsList((prev) => [...prev, comment.comment]);
+    });
     setCommentText("");
     setIsTyping(false);
-  }, []);
+  }, [user, commentText, startMinutes, startSeconds, endMinutes, endSeconds]);
 
+  if (!user) return null;
+  console.log(user)
   return (
     <div className="">
       <div className="py-4 flex flex-row gap-4 items-start">
-        <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />{" "}
+        <Avatar src={user.data.profilePicture} />{" "}
         <div className="flex-1">
           <Input
             fullWidth
@@ -99,7 +111,7 @@ export default function CommentsSection({ comments }: CommentsSectionProps) {
           <p className="py-4">No comments yet. Be the first to comment!</p>
         ) : (
           commentsList.map((comment) => (
-            <Comment key={comment.id} comment={comment} />
+            <Comment key={comment.id} comment={comment} video={video} />
           ))
         )}
       </div>

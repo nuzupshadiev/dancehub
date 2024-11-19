@@ -1,3 +1,7 @@
+"use client";
+
+import React from "react";
+
 import {
   Navbar as NextUINavbar,
   NavbarContent,
@@ -25,8 +29,19 @@ import {
   SearchIcon,
   Logo,
 } from "@/components/icons";
-
+import { User } from "@nextui-org/react";
+import { UserContext } from "@/utils/user-context";
+import * as UserAPI from "@/src/API/user";
 export const Navbar = () => {
+  const { user } = React.useContext(UserContext);
+
+  const handleLogout = React.useCallback(() => {
+    UserAPI.default.logout(user).then(() => {
+      localStorage.removeItem("thunderhawks-token");
+      window.location.reload();
+    });
+  }, [user]);
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -136,7 +151,22 @@ export const Navbar = () => {
           ))}
         </div>
       </NavbarMenu> */}
-
+      {user && (
+        <div className="flex flex-row justify-center items-center gap-4">
+          <User
+            onClick={() => {
+              window.location.href = "/projects";
+            }}
+            className="cursor-pointer"
+            name={user.data.name}
+            description={user.data.email}
+            avatarProps={{
+              src: user.data.profilePicture,
+            }}
+          />
+          <Button onPress={handleLogout}>Logout</Button>
+        </div>
+      )}
       <NavbarContent justify="end">
         <ThemeSwitch />
       </NavbarContent>

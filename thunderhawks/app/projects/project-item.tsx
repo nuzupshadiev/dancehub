@@ -41,51 +41,26 @@ const ProjectItem = ({ project, deleteProject }: ProjectItemProps) => {
       onPress={() => router.push(`/projects/${id}`)}
       as={"div"}
     >
-      <CardHeader className="!p-0 flex flex-row flex-wrap justify-between items-center gap-y-1">
-        <Chip className="bg-background rounded-xl text-xs">
-          <p>{"date"}</p>
-        </Chip>
-        <div className="flex flex-row gap-x-2">
-          <Tooltip content="Copy Invitation Code" placement="top">
-            <div>
-              <Button
-                isIconOnly
-                className="bg-background"
-                radius="full"
-                size="sm"
-                onPress={copyInvitationCode}
-              >
-                <FontAwesomeIcon
-                  className="text-default-600 size-3"
-                  icon={faCopy}
-                />
-              </Button>
-            </div>
-          </Tooltip>
-          <Tooltip content="Delete Project" placement="top">
-            <div>
-              <Button
-                isIconOnly
-                className="bg-background"
-                radius="full"
-                size="sm"
-                onPress={() => deleteProject(project)}
-              >
-                <FontAwesomeIcon
-                  className="text-default-600 size-3"
-                  icon={faTrash}
-                />
-              </Button>
-            </div>
-          </Tooltip>
-        </div>
-      </CardHeader>
       <CardBody className="!p-0 ml-1 h-20">
         <h1 className="font-bold text-xl text-foreground">{title}</h1>
-        <p className="text-xs">time</p>
       </CardBody>
       <CardFooter className="!p-0 flex flex-row justify-end py-2 items-center gap-x-4">
-        <FontAwesomeIcon icon={faUsers} className="text-default-500" />
+        <Tooltip content="Delete Project" placement="top">
+          <div>
+            <Button
+              isIconOnly
+              className="bg-background"
+              radius="full"
+              size="sm"
+              onPress={() => deleteProject(project)}
+            >
+              <FontAwesomeIcon
+                className="text-default-600 size-3"
+                icon={faTrash}
+              />
+            </Button>
+          </div>
+        </Tooltip>
       </CardFooter>
     </Card>
   );

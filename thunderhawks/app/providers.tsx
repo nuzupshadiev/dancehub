@@ -20,7 +20,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     React.useState<React.ContextType<typeof UserContext>["user"]>(undefined);
 
   React.useEffect(() => {
-    const token = localStorage.getItem("dancehub-user-token");
+    const token = localStorage.getItem("thunderhawks-token");
 
     if (token) {
       User.getUser({ token: token })
@@ -28,7 +28,8 @@ export function Providers({ children, themeProps }: ProvidersProps) {
           setUser(user);
         })
         .catch(() => {
-          setUser(null);
+          console.error("Failed to get user");
+          router.push("/login");
         });
     }
   }, []);

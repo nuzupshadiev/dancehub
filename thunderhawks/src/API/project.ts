@@ -18,7 +18,17 @@ export type ProjectT = {
   members: UserT[];
   videos: VideoT[];
 };
-
+export type ProjectVideoT = {
+  id: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+};
+export type ProjectVideosT = {
+  totalVideos: number;
+  project: string;
+  videos: ProjectVideoT[];
+};
 export default class Project {
   data: ProjectT;
   constructor(data: ProjectT) {
@@ -31,8 +41,11 @@ export default class Project {
 
     return Endpoint.request("delete", {
       url: `project/${this.data.id}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
       params: {
-        token: user.token,
+        userId: user.data.id,
       },
     });
   }
@@ -44,8 +57,11 @@ export default class Project {
     return Endpoint.request<ProjectT>("put", {
       url: `api/project/${this.data.id}`,
       data: payload,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
       params: {
-        token: user.token,
+        userId: user.data.id,
       },
     }).then((resp) => new Project(resp.data));
   }
@@ -56,9 +72,12 @@ export default class Project {
     }
 
     return Endpoint.request<ProjectsResponseT>("get", {
-      url: "/api/projects/",
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
       params: {
-        token: user.token,
+        userId: user.data.id,
       },
     }).then((resp) =>
       resp.data.projects.map((project) => new Project(project))
@@ -77,9 +96,12 @@ export default class Project {
       data: {
         title: projectName,
       },
-      url: "/api/projects/",
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
       params: {
-        token: user.token,
+        userId: user.data.id,
       },
     }).then((resp) => new Project(resp.data.project));
   }
@@ -90,9 +112,15 @@ export default class Project {
     // }
 
     // return Endpoint.request<ProjectResponseT>("get", {
-    //   url: `/api/projects/${id}`,
+    //   url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/code/${id}`,
+    //   headers: {
+    //     Authorization: `Bearer ${user.token}`,
+    //   },
     //   params: {
-    //     token: user.token,
+    //     userId: user.data.id,
+    //   },
+    //   data: {
+    //     projectCode: id,
     //   },
     // }).then((resp) => new Project(resp.data.project));
     return Promise.resolve(
@@ -133,10 +161,32 @@ export default class Project {
     }
 
     return Endpoint.request<ProjectResponseT>("post", {
-      url: `/api/projects/join/${joinCode}`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/code/${joinCode}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
       params: {
-        token: user.token,
+        projectCode: joinCode,
       },
     }).then((resp) => new Project(resp.data.project));
+  }
+
+  static getProjectVideos(
+    projectId: string,
+    user: UserContextT["user"]
+  ): Promise<ProjectVideosT> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<ProjectVideosT>("get", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/list/${projectId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        userId: user.data.id,
+      },
+    }).then((resp) => resp.data);
   }
 }

@@ -24,7 +24,6 @@ function Login() {
         if (resp.token) {
           setErrorMessage("");
           setUser(resp);
-          localStorage.setItem("thunderhawks-token", resp.token);
           router.push("/projects");
         }
       })

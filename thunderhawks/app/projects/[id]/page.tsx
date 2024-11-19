@@ -2,7 +2,11 @@
 
 import React from "react";
 
-import Project, { ProjectT } from "@/src/API/project";
+import Project, {
+  ProjectT,
+  ProjectVideosT,
+  ProjectVideoT,
+} from "@/src/API/project";
 import { testProjects } from "@/src/testdata/testdata";
 import Link from "next/link";
 import { Input } from "@nextui-org/input";
@@ -36,25 +40,22 @@ function ProjectPage({
     onOpenChange: onCreateOpenChange,
     onClose: onCreateClose,
   } = useDisclosure();
-  const [project, setProject] = React.useState<Project | null>(null);
+  const [project, setProject] = React.useState<ProjectVideosT | null>(null);
   const [warningMessage, setWarningMessage] = React.useState("");
   const [filterValue, setFilterValue] = React.useState("");
-  const [videos, setVideos] = React.useState<VideoT[]>([]);
+  const [videos, setVideos] = React.useState<ProjectVideoT[]>([]);
   const { user } = React.useContext(UserContext);
   const [videoTitle, setVideoTitle] = React.useState("");
   const [videoDescription, setVideoDescription] = React.useState("");
-  const [videoUrl, setVideoUrl] = React.useState("");
-  const [thumbnailUrl, setThumbnailUrl] = React.useState("");
+  const [videoUrl, setVideoUrl] = React.useState<File | null>(null);
 
   React.useEffect(() => {
-    Project.getProject(params.id, user)
+    Project.getProjectVideos(params.id, user)
       .then((project) => {
         setProject(project);
-        setVideos(project.data.videos);
+        setVideos(project.videos);
       })
-      .catch((err) => {
-        console.error(err);
-      });
+      .catch((err) => {});
   }, [params.id, user]);
 
   const onSearchChange = React.useCallback((value?: string) => {
@@ -76,34 +77,31 @@ function ProjectPage({
   }, []);
 
   const onVideoUploadHandler = React.useCallback(() => {
-    if (!videoTitle || !videoDescription || !videoUrl || !thumbnailUrl) {
+    if (!videoTitle || !videoDescription || !videoUrl) {
       setWarningMessage("Please fill out all fields");
       return;
     }
     // create new video
     // Project.createVideo(
-    Video.createVideo(
-      {
-        title: videoTitle,
-        description: videoDescription,
-        videoFile: new File([videoUrl], videoTitle),
-        videoThumbnail: new File([thumbnailUrl], videoTitle),
-        projectId: project?.data.id || "",
-      },
-      user
-    )
+    const formData = new FormData();
+
+    formData.append("videoFile", videoUrl);
+    formData.append("title", videoTitle);
+    formData.append("description", videoDescription);
+    formData.append("projectId", params.id);
+    Video.createVideo(formData, user)
       .then((video) => {
         setVideos([...videos, video.data]);
         onCreateClose();
       })
       .catch((err) => {
         console.error(err);
+        setWarningMessage("An error occurred while creating the video");
       });
   }, [
     videoTitle,
     videoDescription,
     videoUrl,
-    thumbnailUrl,
     project,
     user,
     videos,
@@ -121,7 +119,7 @@ function ProjectPage({
       <div className="flex flex-row flex-wrap justify-between items-center gap-4 mb-3">
         <div className="flex flex-row justify-center items-center gap-4">
           <Link href="/dashboard/project" color="foreground">
-            <h1 className="text-xl font-bold">{project.data.title}</h1>
+            <h1 className="text-xl font-bold">{project.project}</h1>
           </Link>
           <div>
             <Input
@@ -151,12 +149,7 @@ function ProjectPage({
           <ModalContent>
             <ModalHeader>{"Upload a Video"} </ModalHeader>
             <ModalBody>
-              <VideoInput
-                setThumbnailSource={setThumbnailUrl}
-                setVideoSource={setVideoUrl}
-                thumbnailSource={thumbnailUrl}
-                videoSource={videoUrl}
-              />
+              <VideoInput setVideoSource={setVideoUrl} videoSource={videoUrl} />
               <Input
                 isRequired
                 label={"Title"}

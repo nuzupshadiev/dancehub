@@ -52,7 +52,7 @@ function Page() {
       .catch((err) => {
         console.error(err);
       });
-  }, []);
+  }, [user]);
 
   const onSearchChange = React.useCallback((value?: string) => {
     if (value) {
@@ -82,7 +82,6 @@ function Page() {
         .catch((err) => {
           console.error(err);
         });
-      // send delete request to server
     },
     [user, setProjects]
   );
@@ -113,7 +112,11 @@ function Page() {
         setWarningMessage("Something went wrong, please try again later");
         console.error(err);
       });
-  }, []);
+  }, [projectName]);
+
+  if (!user) {
+    window.location.href = "/login";
+  }
 
   return (
     <div className="flex flex-col px-2 py-8 md:px-8">

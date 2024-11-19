@@ -1,3 +1,4 @@
+import { Comment } from "./../../../backend/src/interfaces/Comment";
 import { UserContextT } from "@/utils/user-context";
 import { UserT } from "./user";
 import { AxiosResponse } from "axios";
@@ -24,6 +25,7 @@ export type VideoT = {
   videoUrl: string;
   thumbnailUrl: string;
   likes: number;
+  likedBy: UserT[];
   versions: string[];
   version: string;
   comments: CommentT[];
@@ -32,18 +34,24 @@ type VideosResponseT = {
   message: string;
   videos: VideoT[];
 };
+type VideoCreateT = {
+  title: string;
+  description: string;
+  videoFile: FormData;
+  projectId: string;
+};
+type CommentCreateT = {
+  message: string;
+  comment: CommentT;
+};
+type getCommentsResponseT = {
+  message: string;
+  comments: CommentT[];
+};
 type VideoResponseT = {
   message: string;
   video: VideoT;
 };
-type VideoCreateT = {
-  title: string;
-  description: string;
-  videoFile: File;
-  projectId: string;
-  videoThumbnail: File;
-};
-
 export default class Video {
   data: VideoT;
   constructor(data: VideoT) {
@@ -55,9 +63,12 @@ export default class Video {
     }
 
     return Endpoint.request("delete", {
-      url: `video/${this.data.id}`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}video/${this.data.id}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
       params: {
-        token: user.token,
+        userId: user.data.id,
       },
     });
   }
@@ -68,9 +79,12 @@ export default class Video {
     }
 
     return Endpoint.request<VideosResponseT>("get", {
-      url: "/api/videos/",
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
       params: {
-        token: user.token,
+        userId: user.data.id,
       },
     }).then((resp) => resp.data.videos.map((video) => new Video(video)));
   }
@@ -80,48 +94,162 @@ export default class Video {
       return Promise.reject("No user provided");
     }
 
-    return Endpoint.request<VideoResponseT>("get", {
-      url: `/api/projects/${id}`,
+    return Endpoint.request<VideoT>("get", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${id}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
       params: {
-        token: user.token,
+        userId: user.data.id,
+      },
+    }).then((resp) => new Video(resp.data));
+  }
+
+  static createVideo(
+    payload: FormData,
+    user: UserContextT["user"]
+  ): Promise<Video> {
+    if (!user) {
+      return Promise.reject(new Error("No user provided"));
+    }
+
+    return Endpoint.request<VideoResponseT>("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/`,
+      data: payload,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+        "Content-Type": "multipart/form-data",
       },
     }).then((resp) => new Video(resp.data.video));
   }
 
-  static createVideo(
-    payload: VideoCreateT,
+  static leaveComment(
+    payload: {
+      content: string;
+      start: string;
+      end: string;
+    },
+    videoId: string,
     user: UserContextT["user"]
-  ): Promise<Video> {
-    // if (!user) {
-    //   return Promise.reject("No user provided");
-    // }
+  ): Promise<CommentCreateT> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
 
-    // return Endpoint.request<VideoResponseT>("post", {
-    //   url: "/api/videos/",
-    //   data: payload,
-    //   params: {
-    //     token: user.token,
-    //   },
-    // }).then((resp) => new Video(resp.data.video));
+    return Endpoint.request<CommentCreateT>("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments`,
+      data: {
+        content: payload.content,
+        start: payload.start,
+        end: payload.end,
+      },
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        videoId: videoId,
+      },
+    }).then((resp) => {
+      return resp.data;
+    });
+  }
 
-    return Promise.resolve(
-      new Video({
-        id: "1",
-        title: payload.title,
-        description: payload.description,
-        uploader: {
-          id: "1",
-          name: "John Doe",
-          profilePicture: "https://via.placeholder.com/150",
-          username: "johndoe",
-        },
-        videoUrl: URL.createObjectURL(payload.videoFile),
-        thumbnailUrl: URL.createObjectURL(payload.videoThumbnail),
-        likes: 0,
-        versions: ["1"],
-        version: "1",
-        comments: [],
-      })
-    );
+  static getComments(
+    videoId: string,
+    user: UserContextT["user"]
+  ): Promise<CommentT[]> {
+    if (!user) {
+      return Promise.resolve([]);
+    }
+
+    return Endpoint.request<getCommentsResponseT>("get", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        videoId: videoId,
+      },
+    }).then((resp) => resp.data.comments);
+  }
+
+  static likeComment(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}/like`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        commentId: commentId,
+        videoId: videoId,
+      },
+    });
+  }
+
+  static unlikeComment(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}/unlike`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        commentId: commentId,
+        videoId: videoId,
+      },
+    });
+  }
+
+  static likeVideo(
+    user: UserContextT["user"],
+    videoId: string
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/like`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        videoId: videoId,
+      },
+    });
+  }
+
+  static unlikeVideo(
+    user: UserContextT["user"],
+    videoId: string
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/unlike`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        videoId: videoId,
+      },
+    });
   }
 }

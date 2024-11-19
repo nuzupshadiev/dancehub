@@ -101,4 +101,11 @@ async function UpdateProfile(req: Request, res: Response) {
   res.json(result);
 }
 
-export { GetProfile, UpdateProfile, GetUserInfo };
+async function GetAllUsers(req: Request, res: Response) {
+  const [users] = await pool.query<RowDataPacket[]>(
+    "SELECT id, name, email, password, profilePicture, createdAt FROM user"
+  );
+  res.json({ users });
+}
+
+export { GetProfile, UpdateProfile, GetUserInfo, GetAllUsers };

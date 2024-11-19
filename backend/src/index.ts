@@ -32,6 +32,7 @@ app.post("/api/auth/login", auth.Login);
 app.post("/api/auth/logout", jwtMiddleware, auth.Logout);
 
 // User API routes
+app.get("/api/users/all", users.GetAllUsers);
 app.get("/api/users/:userId", users.GetProfile);
 app.get("/api/users", jwtMiddleware, users.GetProfile);
 app.put(

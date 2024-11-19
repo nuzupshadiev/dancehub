@@ -106,52 +106,6 @@ export default class Project {
     }).then((resp) => new Project(resp.data.project));
   }
 
-  static getProject(id: string, user: UserContextT["user"]): Promise<Project> {
-    // if (!user) {
-    //   return Promise.reject("No user provided");
-    // }
-
-    // return Endpoint.request<ProjectResponseT>("get", {
-    //   url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/code/${id}`,
-    //   headers: {
-    //     Authorization: `Bearer ${user.token}`,
-    //   },
-    //   params: {
-    //     userId: user.data.id,
-    //   },
-    //   data: {
-    //     projectCode: id,
-    //   },
-    // }).then((resp) => new Project(resp.data.project));
-    return Promise.resolve(
-      new Project({
-        id: "1",
-        title: "Project 1",
-        administrator: "admin",
-        members: [],
-        videos: [
-          {
-            id: "1",
-            title: "Video 1",
-            description: "Description 1",
-            videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            thumbnailUrl: "https://via.placeholder.com/150",
-            uploader: {
-              id: "",
-              name: "",
-              username: "",
-              profilePicture: "",
-            },
-            likes: 0,
-            versions: [],
-            version: "",
-            comments: [],
-          },
-        ],
-      })
-    );
-  }
-
   static joinProject(
     joinCode: string,
     user: UserContextT["user"]

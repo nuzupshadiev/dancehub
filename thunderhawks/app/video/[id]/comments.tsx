@@ -49,7 +49,7 @@ export default function CommentsSection({ video }: CommentsSectionProps) {
         content: commentText,
       },
       video.data.id,
-      user
+      user,
     ).then((comment) => {
       setCommentsList((prev) => [...prev, comment.comment]);
     });
@@ -58,7 +58,7 @@ export default function CommentsSection({ video }: CommentsSectionProps) {
   }, [user, commentText, startMinutes, startSeconds, endMinutes, endSeconds]);
 
   if (!user) return null;
-  console.log(user)
+  console.log(user);
   return (
     <div className="">
       <div className="py-4 flex flex-row gap-4 items-start">

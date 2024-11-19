@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import Video from "next-video";
-
+import ReactPlayer from "react-player";
 import CommentsSection from "./comments";
 import DescriptionSection from "./description";
 
@@ -72,7 +71,12 @@ function VideoPage({
   return (
     <div className="flex flex-col gap-2 p-4">
       <div className="flex flex-col gap-2">
-        <Video className="rounded-lg max-w-7xl" src={video.data.videoUrl} />
+        <ReactPlayer
+          url={video.data.videoUrl}
+          width={"100%"}
+          height={"100%"}
+          controls
+        />
         <div className="flex flex-row justify-between max-w-7xl">
           <h1 className="text-xl font-bold">{video.data.title}</h1>
           <div

@@ -19,9 +19,8 @@ import {
 
 import ProjectItem from "./project-item";
 import Project, { ProjectT } from "@/src/API/project";
-import { testProjects } from "@/src/testdata/testdata";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { UserContext } from "@/utils/user-context";
+import { useRouter } from "next/navigation";
 function Page() {
   const {
     isOpen: isJoinOpen,
@@ -36,7 +35,7 @@ function Page() {
     onClose: onCreateClose,
   } = useDisclosure();
   const [warningMessage, setWarningMessage] = React.useState("");
-
+  const router = useRouter();
   const [projects, setProjects] = React.useState<Project[]>([]);
   const [filterValue, setFilterValue] = React.useState("");
   const [projectName, setProjectName] = React.useState("");
@@ -64,7 +63,7 @@ function Page() {
 
   const filteredProjects = React.useMemo(() => {
     return projects.filter((project) =>
-      project.data.title.toLowerCase().includes(filterValue.toLowerCase())
+      project.data.title.toLowerCase().includes(filterValue.toLowerCase()),
     );
   }, [projects, filterValue]);
 
@@ -75,15 +74,15 @@ function Page() {
         .then(() => {
           setProjects((prev) =>
             prev.filter(
-              (projectItem) => projectItem.data.id !== project.data.id
-            )
+              (projectItem) => projectItem.data.id !== project.data.id,
+            ),
           );
         })
         .catch((err) => {
           console.error(err);
         });
     },
-    [user, setProjects]
+    [user, setProjects],
   );
 
   const handleJoinProject = React.useCallback(() => {
@@ -115,7 +114,7 @@ function Page() {
   }, [projectName]);
 
   if (!user) {
-    window.location.href = "/login";
+    router.push("/login");
   }
 
   return (

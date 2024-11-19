@@ -7,7 +7,6 @@ import Project, {
   ProjectVideosT,
   ProjectVideoT,
 } from "@/src/API/project";
-import { testProjects } from "@/src/testdata/testdata";
 import Link from "next/link";
 import { Input } from "@nextui-org/input";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -68,7 +67,7 @@ function ProjectPage({
 
   const filteredVideos = React.useMemo(() => {
     return videos.filter((video) =>
-      video.title.toLowerCase().includes(filterValue.toLowerCase())
+      video.title.toLowerCase().includes(filterValue.toLowerCase()),
     );
   }, [videos, filterValue]);
 

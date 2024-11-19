@@ -13,4 +13,3 @@ export const UserContext = React.createContext<UserContextT>({
   user: null,
   setUser: () => {},
 });
-

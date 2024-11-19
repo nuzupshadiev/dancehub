@@ -12,15 +12,15 @@ export class Endpoint<OutputT> {
     this.instance = axios.create({ method, baseURL });
   }
   req(
-    config: Omit<AxiosRequestConfig<any>, "baseURL" | "method">
-  ): Promise<AxiosResponse<OutputT> > {
+    config: Omit<AxiosRequestConfig<any>, "baseURL" | "method">,
+  ): Promise<AxiosResponse<OutputT>> {
     return this.instance.request(config);
   }
 
   static request<OutputT>(
     method: Method,
-    params: Omit<AxiosRequestConfig<any>, "method">
-  ): Promise<AxiosResponse<OutputT> > {
-    return new Endpoint(method).req(params) as Promise<AxiosResponse<OutputT> >;
+    params: Omit<AxiosRequestConfig<any>, "method">,
+  ): Promise<AxiosResponse<OutputT>> {
+    return new Endpoint(method).req(params) as Promise<AxiosResponse<OutputT>>;
   }
 }

@@ -107,7 +107,7 @@ export default class Video {
 
   static createVideo(
     payload: FormData,
-    user: UserContextT["user"]
+    user: UserContextT["user"],
   ): Promise<Video> {
     if (!user) {
       return Promise.reject(new Error("No user provided"));
@@ -130,7 +130,7 @@ export default class Video {
       end: string;
     },
     videoId: string,
-    user: UserContextT["user"]
+    user: UserContextT["user"],
   ): Promise<CommentCreateT> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -156,7 +156,7 @@ export default class Video {
 
   static getComments(
     videoId: string,
-    user: UserContextT["user"]
+    user: UserContextT["user"],
   ): Promise<CommentT[]> {
     if (!user) {
       return Promise.resolve([]);
@@ -176,7 +176,7 @@ export default class Video {
   static likeComment(
     user: UserContextT["user"],
     commentId: string,
-    videoId: string
+    videoId: string,
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -197,7 +197,7 @@ export default class Video {
   static unlikeComment(
     user: UserContextT["user"],
     commentId: string,
-    videoId: string
+    videoId: string,
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -217,7 +217,7 @@ export default class Video {
 
   static likeVideo(
     user: UserContextT["user"],
-    videoId: string
+    videoId: string,
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -236,7 +236,7 @@ export default class Video {
 
   static unlikeVideo(
     user: UserContextT["user"],
-    videoId: string
+    videoId: string,
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");

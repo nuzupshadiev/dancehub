@@ -53,7 +53,7 @@ export class LocalStorageTokenManager implements TokenManagerI<string> {
   store() {
     localStorage.setItem(
       this.storageKey,
-      Buffer.from(this.token).toString("base64")
+      Buffer.from(this.token).toString("base64"),
     );
   }
   clear() {

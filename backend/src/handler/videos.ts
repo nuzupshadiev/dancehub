@@ -26,6 +26,28 @@ async function GetVideo(req: Request, res: Response) {
   }
   const video = videoRows[0];
 
+  const [videoLikeData] = await pool.query<RowDataPacket[]>(
+    `select * from video_likes
+    inner join user on video_likes.userId = user.id
+    where videoId = ?`,
+    [videoId]
+  );
+
+  const likedBy = videoLikeData.map((like) => ({
+    id: like.userId,
+    name: like.name,
+    profileUrl: like.profilePicture,
+  }));
+
+  const [uploaderData] = await pool.query<RowDataPacket[]>(
+    "SELECT * FROM user WHERE id = ?",
+    [video.uploaderId]
+  );
+  if (uploaderData.length === 0) {
+    return res.status(500).json({ message: "Failed to fetch uploader" });
+  }
+  const uploader = uploaderData[0];
+
   const [versionsRows] = await pool.query<RowDataPacket[]>(
     "SELECT version FROM video WHERE id = ?",
     [videoId]
@@ -90,13 +112,14 @@ async function GetVideo(req: Request, res: Response) {
     version: video.version,
     description: video.description,
     uploader: {
-      id: video.uploaderId,
-      name: video.uploaderName,
-      profileUrl: video.uploaderProfile,
+      id: uploader.id,
+      name: uploader.name,
+      profileUrl: uploader.profilePicture,
     },
     project: video.projectId,
     videoUrl: video.videoUrl,
     likes: video.likes,
+    likedBy,
     versions,
     comments,
   };
@@ -124,14 +147,31 @@ async function UploadVideo(req: Request, res: Response) {
   const version = new Date();
 
   const [uploader] = await pool.query<RowDataPacket[]>(
-    "SELECT id FROM user WHERE id = ?",
+    "SELECT * FROM user WHERE id = ?",
     [uploaderId]
   );
-  console.log(uploader);
+  if (uploader.length === 0) {
+    return res.status(404).json({ message: "Uploader not found" });
+  }
+
+  const [projectData] = await pool.query<RowDataPacket[]>(
+    "SELECT id FROM project WHERE id = ?",
+    [project]
+  );
+  if (projectData.length === 0) {
+    return res.status(404).json({ message: "Project not found" });
+  }
 
   const [result] = await pool.query<RowDataPacket[]>(
     "INSERT INTO video (title, description, videoUrl, projectId, uploaderId, version, likes) VALUES (?, ?, ?, ?, ?, ?, 0);",
-    [title, description || null, videoUrl, project, uploaderId, version]
+    [
+      title,
+      description || null,
+      videoUrl,
+      projectData[0].id,
+      uploaderId,
+      version,
+    ]
   );
 
   const insertId = (result as any).insertId;
@@ -280,7 +320,6 @@ async function GetVideoList(req: Request, res: Response) {
     id: video.id,
     title: video.title,
     description: video.description,
-    thumbnailUrl: video.thumbnailUrl || "",
   }));
 
   const [projectData] = await pool.query<RowDataPacket[]>(

@@ -55,7 +55,6 @@ async function GetProjects(req: Request, res: Response) {
         title: row.title,
         description: row.description,
         videoUrl: row.videoUrl,
-        thumbnailUrl: row.thumbnailUrl,
         createdAt: row.createdAt,
       };
     });
@@ -184,7 +183,6 @@ async function UpdateProject(req: Request, res: Response) {
       title: row.title,
       description: row.description,
       videoUrl: row.videoUrl,
-      thumbnailUrl: row.thumbnailUrl,
       createdAt: row.createdAt,
     };
   });

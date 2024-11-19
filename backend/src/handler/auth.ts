@@ -18,15 +18,14 @@ async function Login(req: Request, res: Response) {
     "SELECT * FROM user WHERE email = ? AND password = ?",
     [email, password]
   );
-  if (rows.length === 0 || rows[0] === undefined) {
-    res.status(401).json({ message: "Invalid credentials" });
+  if (rows.length === 0 || rows[0] == undefined) {
+    return res.status(401).json({ message: "Invalid credentials" });
   }
 
   const user = await GetUserInfo(rows[0].id);
   if (user === null) {
     return res.status(500).json({ message: "Failed to fetch user" });
   }
-  console.log(user);
 
   res.status(200).json({
     message: "Login successful",

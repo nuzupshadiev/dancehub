@@ -385,7 +385,7 @@ async function UnlikeComment(req: Request, res: Response) {
   }
 
   const [resultData] = await pool.query<ResultSetHeader>(
-    "update comment set likes = likes + 1 where id = ?",
+    "update comment set likes = likes - 1 where id = ?",
     [commentId]
   );
 

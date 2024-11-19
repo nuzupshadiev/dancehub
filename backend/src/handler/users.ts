@@ -3,6 +3,37 @@ import { User, sampleUser } from "../interfaces/User";
 import { pool } from "../database/db";
 import { RowDataPacket } from "mysql2";
 
+async function GetUserInfo(userId: number) {
+  const [user] = await pool.query<RowDataPacket[]>(
+    "SELECT id, name, email, profilePicture, createdAt FROM user WHERE id = ?",
+    [userId]
+  );
+  if (user.length === 0 || user[0] === undefined) {
+    return null;
+  }
+
+  const [projectIds] = await pool.query(
+    "SELECT id FROM member WHERE userId = ?",
+    [userId]
+  );
+
+  let projects = [];
+  for (let id in projectIds) {
+    const [project] = await pool.query<RowDataPacket[]>(
+      `select project.id, project.title, project.administratorId, name as adminName, email as adminEmail, profilePicture as profileUrl from project
+        inner join member on project.id = member.projectId
+        inner join user on member.userId = user.id
+        where project.id = ?;`,
+      [id]
+    );
+    if (project.length > 0) {
+      projects.push(project[0]);
+    }
+  }
+
+  return { ...user[0], projects };
+}
+
 async function GetProfile(req: Request, res: Response) {
   const userId = req.params.userId;
 
@@ -87,4 +118,4 @@ async function UpdateProfile(req: Request, res: Response) {
   res.json(result);
 }
 
-export { GetProfile, UpdateProfile };
+export { GetProfile, UpdateProfile, GetUserInfo };

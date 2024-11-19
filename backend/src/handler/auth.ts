@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
 import { pool } from "../database/db";
-import { PoolConnection, QueryError, RowDataPacket } from "mysql2";
+import {
+  PoolConnection,
+  QueryError,
+  ResultSetHeader,
+  RowDataPacket,
+} from "mysql2";
 import { generateToken } from "../services/authService";
+import { GetUserInfo } from "./users";
 
 async function Login(req: Request, res: Response) {
   const name = req.body.name;
@@ -15,8 +21,16 @@ async function Login(req: Request, res: Response) {
   if (rows.length === 0 || rows[0] === undefined) {
     res.status(401).json({ message: "Invalid credentials" });
   }
+
+  const user = await GetUserInfo(rows[0].id);
+  if (user === null) {
+    return res.status(500).json({ message: "Failed to fetch user" });
+  }
+  console.log(user);
+
   res.status(200).json({
     message: "Login successful",
+    user,
     token: generateToken({ id: rows[0].id, sub: name, email: email }),
   });
 }
@@ -40,22 +54,30 @@ async function Register(req: Request, res: Response) {
     ? `http://localhost:8000/static/images/${profilePicture.filename}`
     : null;
 
-  await pool.query<RowDataPacket[]>(
+  const [insertData] = await pool.query<ResultSetHeader>(
     "INSERT INTO user (name, email, password, createdAt, profilePicture) VALUES (?, ?, ?, ?, ?)",
     [name, email, password, new Date(), imageUrl]
   );
 
   const [newRows] = await pool.query<RowDataPacket[]>(
-    "SELECT * FROM user WHERE email = ?",
-    [email]
+    "SELECT * FROM user WHERE id = ?",
+    [insertData.insertId]
   );
 
   if (newRows.length === 0 || newRows[0] === undefined) {
     return res.status(500).json({ message: "Failed to register user" });
   }
 
+  const user = await GetUserInfo(insertData.insertId);
+  console.log(user);
+
+  if (user === null) {
+    return res.status(500).json({ message: "Failed to fetch user" });
+  }
+
   res.status(200).json({
     message: "User registered successfully",
+    user,
     token: generateToken({ id: newRows[0].id, sub: name, email: email }),
   });
 }

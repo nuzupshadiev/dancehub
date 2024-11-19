@@ -62,6 +62,7 @@ async function GetProjects(req: Request, res: Response) {
 
     projects.push({
       id: project.id,
+      title: project.title,
       name: project.name,
       description: project.description,
       administrator: administrator,

@@ -133,7 +133,9 @@ async function AddComment(req: Request, res: Response) {
   }
 
   const [commentData] = await pool.query<RowDataPacket[]>(
-    "select * from comment where id = ?",
+    `select * from comment
+    inner join user on comment.userId = user.id
+    where comment.id = ?`,
     [insertId]
   );
 

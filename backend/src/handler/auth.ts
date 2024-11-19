@@ -51,7 +51,7 @@ async function Register(req: Request, res: Response) {
 
   const profilePicture = req.file;
   const imageUrl = profilePicture
-    ? `http://localhost:8000/static/images/${profilePicture.filename}`
+    ? `http://34.170.203.67:8000/static/images/${profilePicture.filename}`
     : null;
 
   const [insertData] = await pool.query<ResultSetHeader>(

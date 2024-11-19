@@ -41,34 +41,13 @@ async function GetProfile(req: Request, res: Response) {
     userId = req.user!.id.toString();
   }
 
-  const [user] = await pool.query<RowDataPacket[]>(
-    "SELECT id, name, email, profilePicture, createdAt FROM user WHERE id = ?",
-    [userId]
-  );
-  if (user.length === 0 || user[0] === undefined) {
-    res.status(404).json({ message: "User not found" });
+  const user = await GetUserInfo(parseInt(userId));
+
+  if (user === null) {
+    return res.status(500).json({ message: "Failed to fetch user" });
   }
 
-  const [projectIds] = await pool.query(
-    "SELECT id FROM member WHERE userId = ?",
-    [userId]
-  );
-
-  let projects = [];
-  for (let id in projectIds) {
-    const [project] = await pool.query<RowDataPacket[]>(
-      `select project.id, project.title, project.administratorId, name as adminName, email as adminEmail, profilePicture as profileUrl from project
-        inner join member on project.id = member.projectId
-        inner join user on member.userId = user.id
-        where project.id = ?;`,
-      [id]
-    );
-    console.log(project[0]);
-    if (project.length > 0) {
-      projects.push(project[0]);
-    }
-  }
-  res.json({ ...user[0], projects });
+  res.json({ user: { ...user } });
 }
 
 async function UpdateProfile(req: Request, res: Response) {
@@ -108,7 +87,7 @@ async function UpdateProfile(req: Request, res: Response) {
   }
   if (req.file) {
     const profilePicture = req.file;
-    const imageUrl = `http://localhost:8000/static/images/${profilePicture.filename}`;
+    const imageUrl = `http://34.170.203.67:8000/static/images/${profilePicture.filename}`;
     await pool.query<RowDataPacket[]>(
       `UPDATE user SET profilePicture = ? WHERE id = ?`,
       [imageUrl, userId]

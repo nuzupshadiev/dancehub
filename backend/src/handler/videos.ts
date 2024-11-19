@@ -127,13 +127,13 @@ async function GetVideo(req: Request, res: Response) {
 }
 
 async function UploadVideo(req: Request, res: Response) {
-  const { title, project, description } = req.body;
+  const { title, projectId, description } = req.body;
   const uploaderId = req.user!.id;
 
-  if (!title || !project) {
+  if (!title || !projectId) {
     return res.status(400).json({ message: "Title and project are required" });
   }
-  if (isNaN(project)) {
+  if (isNaN(projectId)) {
     return res.status(400).json({ message: "Project ID must be a number" });
   }
 
@@ -156,7 +156,7 @@ async function UploadVideo(req: Request, res: Response) {
 
   const [projectData] = await pool.query<RowDataPacket[]>(
     "SELECT id FROM project WHERE id = ?",
-    [project]
+    [projectId]
   );
   if (projectData.length === 0) {
     return res.status(404).json({ message: "Project not found" });
@@ -185,7 +185,7 @@ async function UploadVideo(req: Request, res: Response) {
       name: uploader[0].name,
       profileUrl: uploader[0].profilePicture, // Adjust if profile pictures are served differently
     },
-    project: project,
+    project: projectId,
     videoUrl,
     likes: 0,
     versions: [version.toISOString()],

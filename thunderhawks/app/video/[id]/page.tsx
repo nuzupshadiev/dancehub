@@ -75,6 +75,7 @@ function VideoPage({
     const goToTimeSeconds = minutes * 60 + seconds;
 
     if (playerRef.current) {
+      // @ts-ignore
       playerRef.current.seekTo(goToTimeSeconds, "seconds");
     }
   }, []);

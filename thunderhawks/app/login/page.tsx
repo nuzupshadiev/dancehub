@@ -17,6 +17,7 @@ function Login() {
   const handleLogin = React.useCallback(() => {
     if (email === "" || password === "") {
       setErrorMessage("Please fill all the fields to continue");
+
       return;
     }
     User.login({ email, password })

@@ -1,6 +1,7 @@
 "use client";
-import User from "@/src/API/user";
 import React from "react";
+
+import User from "@/src/API/user";
 
 type UserT = User | null | undefined;
 

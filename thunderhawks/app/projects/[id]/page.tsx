@@ -1,19 +1,12 @@
 "use client";
 
 import React from "react";
-
-import Project, {
-  ProjectT,
-  ProjectVideosT,
-  ProjectVideoT,
-} from "@/src/API/project";
 import Link from "next/link";
 import { Input } from "@nextui-org/input";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@nextui-org/button";
 import {
-  Divider,
   Modal,
   ModalBody,
   ModalContent,
@@ -21,8 +14,11 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import Video, { VideoT } from "@/src/API/video";
+
 import VideoItem from "./video-item";
+
+import Project, { ProjectVideosT, ProjectVideoT } from "@/src/API/project";
+import Video from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
 import VideoInput from "@/components/videoInput";
 

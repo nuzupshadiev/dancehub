@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
+import { Select, SelectItem, Selection } from "@nextui-org/react";
 function VideoPage({
   params,
 }: {
@@ -21,6 +22,7 @@ function VideoPage({
   const [video, setVideo] = React.useState<VideoAPI.default | null>(null);
   const [isLiked, setIsLiked] = React.useState(false);
   const [likes, setLikes] = React.useState(0);
+  const [isFiltered, setIsFiltered] = React.useState(false);
   const playerRef = useRef(null);
 
   const router = useRouter();
@@ -77,6 +79,10 @@ function VideoPage({
     }
   }, []);
 
+  const handleSelectionChange = React.useCallback((value: Selection) => {
+    setIsFiltered((prev) => !prev);
+  }, []);
+
   if (!user) {
     return <p>You need to be logged in to view this page</p>;
     // router.push("/login");
@@ -103,6 +109,15 @@ function VideoPage({
             tabIndex={0}
             onClick={handleLike}
           >
+            <Select
+              size="sm"
+              variant="bordered"
+              placeholder="Filter comments"
+              className="w-40"
+              onSelectionChange={handleSelectionChange}
+            >
+              <SelectItem key={"me"}>{`@${user.data.name}`}</SelectItem>
+            </Select>
             {isLiked ? (
               <FontAwesomeIcon icon={faHeartSolid} color="red" />
             ) : (
@@ -114,7 +129,11 @@ function VideoPage({
       </div>
       <div className="flex flex-col max-w-7xl">
         <DescriptionSection video={video} />
-        <CommentsSection video={video} goToTime={goToTime} />
+        <CommentsSection
+          video={video}
+          goToTime={goToTime}
+          isFiltered={isFiltered}
+        />
       </div>
     </div>
   );

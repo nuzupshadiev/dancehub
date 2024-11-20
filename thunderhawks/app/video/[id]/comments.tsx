@@ -7,14 +7,16 @@ import Comment from "./comment";
 import TimeInput from "@/components/timeinput";
 import Video, { CommentT } from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
-
+import { Selection } from "@nextui-org/react";
 interface CommentsSectionProps {
   video: Video;
   goToTime: (time: string) => void;
+  isFiltered: boolean;
 }
 export default function CommentsSection({
   video,
   goToTime,
+  isFiltered,
 }: CommentsSectionProps) {
   const [commentsList, setCommentsList] = useState<Array<CommentT>>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -60,6 +62,13 @@ export default function CommentsSection({
     setCommentText("");
     setIsTyping(false);
   }, [user, commentText, startMinutes, startSeconds, endMinutes, endSeconds]);
+
+  const filteredTexts = commentsList.filter((text) => {
+    if (isFiltered) {
+      return text.content.includes(`@${user?.data.name}`);
+    }
+    return true;
+  });
 
   if (!user) return null;
 
@@ -111,10 +120,10 @@ export default function CommentsSection({
         </div>
       </div>
       <div className="">
-        {commentsList.length === 0 ? (
+        {filteredTexts.length === 0 ? (
           <p className="py-4">No comments yet. Be the first to comment!</p>
         ) : (
-          commentsList.map((comment) => (
+          filteredTexts.map((comment) => (
             <Comment
               key={comment.id}
               comment={comment}

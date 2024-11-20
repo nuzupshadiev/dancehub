@@ -63,7 +63,7 @@ function Page() {
 
   const filteredProjects = React.useMemo(() => {
     return projects.filter((project) =>
-      project.data.title.toLowerCase().includes(filterValue.toLowerCase()),
+      project.data.title.toLowerCase().includes(filterValue.toLowerCase())
     );
   }, [projects, filterValue]);
 
@@ -74,15 +74,15 @@ function Page() {
         .then(() => {
           setProjects((prev) =>
             prev.filter(
-              (projectItem) => projectItem.data.id !== project.data.id,
-            ),
+              (projectItem) => projectItem.data.id !== project.data.id
+            )
           );
         })
         .catch((err) => {
           console.error(err);
         });
     },
-    [user, setProjects],
+    [user, setProjects]
   );
 
   const handleJoinProject = React.useCallback(() => {
@@ -114,7 +114,7 @@ function Page() {
   }, [projectName]);
 
   if (!user) {
-    router.push("/login");
+    <p>{"You need to be logged in"}</p>;
   }
 
   return (

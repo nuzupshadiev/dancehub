@@ -39,7 +39,7 @@ function Login() {
         <div className="text-center">
           <h1 className="text-3xl font-semibold">Welcome back to</h1>
           <p className="text-primary text-4xl font-semibold py-1 mb-3">
-            Project name
+            DanceHub
           </p>
         </div>
         <Input

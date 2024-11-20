@@ -7,6 +7,7 @@ import { Avatar } from "@nextui-org/react";
 
 import Video, { CommentT } from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
+import MentionText from "./mentionText";
 
 interface CommentProps {
   comment: CommentT;
@@ -61,7 +62,7 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
             {new Date(comment.modifiedAt).toLocaleString()}
           </p>
         </div>
-        <p className="text-sm">{comment.content}</p>
+        <MentionText text={comment.content} />
         <div className="text-xs text-gray-400 mt-1">
           <div>
             Start:{" "}

@@ -28,10 +28,10 @@ export default function DescriptionSection({ video }: DescriptionSectionProps) {
       </CardHeader>
       <CardBody className="flex flex-row">
         {isExpanded ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 flex-start w-full">
             <p>{description}</p>
             <button
-              className="cursor-pointer bg-transparent border-none text-blue-500"
+              className="cursor-pointer bg-transparent border-none text-blue-500 max-w-20"
               onClick={toggleExpand}
             >
               show less

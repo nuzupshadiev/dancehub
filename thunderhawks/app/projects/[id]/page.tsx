@@ -66,7 +66,7 @@ function ProjectPage({
 
   const filteredVideos = React.useMemo(() => {
     return videos.filter((video) =>
-      video.title.toLowerCase().includes(filterValue.toLowerCase()),
+      video.title.toLowerCase().includes(filterValue.toLowerCase())
     );
   }, [videos, filterValue]);
 
@@ -108,7 +108,7 @@ function ProjectPage({
   ]);
 
   if (!user) {
-    router.push("/login");
+    return <p>You need to be logged in</p>;
   }
   if (!project) {
     return <p>No project was found with this id</p>;

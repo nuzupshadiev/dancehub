@@ -18,7 +18,7 @@ export const Navbar = () => {
   const handleLogout = React.useCallback(() => {
     UserAPI.default.logout(user).then(() => {
       localStorage.removeItem("thunderhawks-token");
-      window.location.reload();
+      window.location.href = "/login";
     });
   }, [user]);
 

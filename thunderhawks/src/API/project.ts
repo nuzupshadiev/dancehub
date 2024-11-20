@@ -42,7 +42,7 @@ export default class Project {
     }
 
     return Endpoint.request("delete", {
-      url: `project/${this.data.id}`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/${this.data.id}`,
       headers: {
         Authorization: `Bearer ${user.token}`,
       },
@@ -57,7 +57,7 @@ export default class Project {
     }
 
     return Endpoint.request<ProjectT>("put", {
-      url: `api/project/${this.data.id}`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}project/${this.data.id}`,
       data: payload,
       headers: {
         Authorization: `Bearer ${user.token}`,

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import ReactPlayer from "react-player";
 import CommentsSection from "./comments";
 import DescriptionSection from "./description";
@@ -9,6 +9,7 @@ import { UserContext } from "@/utils/user-context";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/navigation";
 function VideoPage({
   params,
 }: {
@@ -20,6 +21,9 @@ function VideoPage({
   const [video, setVideo] = React.useState<VideoAPI.default | null>(null);
   const [isLiked, setIsLiked] = React.useState(false);
   const [likes, setLikes] = React.useState(0);
+  const playerRef = useRef(null);
+
+  const router = useRouter();
 
   React.useEffect(() => {
     if (!user) {
@@ -64,6 +68,19 @@ function VideoPage({
     }
   }, [user, video, isLiked]);
 
+  const goToTime = React.useCallback((time: string) => {
+    const [minutes, seconds] = time.split(":").map(Number);
+    const goToTimeSeconds = minutes * 60 + seconds;
+
+    if (playerRef.current) {
+      playerRef.current.seekTo(goToTimeSeconds, "seconds");
+    }
+  }, []);
+
+  if (!user) {
+    return <p>You need to be logged in to view this page</p>;
+    // router.push("/login");
+  }
   if (!video) {
     return <p>No video was found with this id</p>;
   }
@@ -72,6 +89,7 @@ function VideoPage({
     <div className="flex flex-col gap-2 p-4">
       <div className="flex flex-col gap-2">
         <ReactPlayer
+          ref={playerRef}
           url={video.data.videoUrl}
           width={"100%"}
           height={"100%"}
@@ -96,7 +114,7 @@ function VideoPage({
       </div>
       <div className="flex flex-col max-w-7xl">
         <DescriptionSection video={video} />
-        <CommentsSection video={video} />
+        <CommentsSection video={video} goToTime={goToTime} />
       </div>
     </div>
   );

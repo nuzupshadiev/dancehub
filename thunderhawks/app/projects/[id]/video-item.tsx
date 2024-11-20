@@ -41,11 +41,11 @@ const VideoItem = ({ video, deleteVideo }: VideoItemProps) => {
       as={"div"}
     >
       <CardBody className=" flex flex-row gap-4 !p-0 ml-1 h-20">
-        <img
+        {/* <img
           alt="thumbnail"
           className="object-fit rounded-lg"
           src={thumbnailUrl}
-        />
+        /> */}
         <div>
           <h1 className="font-bold text-xl text-foreground">{title}</h1>
         </div>

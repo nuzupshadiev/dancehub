@@ -29,7 +29,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
         })
         .catch(() => {
           console.error("Failed to get user");
-          router.push("/login");
+          // router.push("/login");
         });
     }
   }, []);

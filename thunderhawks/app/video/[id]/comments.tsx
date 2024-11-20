@@ -10,8 +10,12 @@ import { UserContext } from "@/utils/user-context";
 
 interface CommentsSectionProps {
   video: Video;
+  goToTime: (time: string) => void;
 }
-export default function CommentsSection({ video }: CommentsSectionProps) {
+export default function CommentsSection({
+  video,
+  goToTime,
+}: CommentsSectionProps) {
   const [commentsList, setCommentsList] = useState<Array<CommentT>>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -49,7 +53,7 @@ export default function CommentsSection({ video }: CommentsSectionProps) {
         content: commentText,
       },
       video.data.id,
-      user,
+      user
     ).then((comment) => {
       setCommentsList((prev) => [...prev, comment.comment]);
     });
@@ -58,7 +62,7 @@ export default function CommentsSection({ video }: CommentsSectionProps) {
   }, [user, commentText, startMinutes, startSeconds, endMinutes, endSeconds]);
 
   if (!user) return null;
-  console.log(user);
+
   return (
     <div className="">
       <div className="py-4 flex flex-row gap-4 items-start">
@@ -111,7 +115,12 @@ export default function CommentsSection({ video }: CommentsSectionProps) {
           <p className="py-4">No comments yet. Be the first to comment!</p>
         ) : (
           commentsList.map((comment) => (
-            <Comment key={comment.id} comment={comment} video={video} />
+            <Comment
+              key={comment.id}
+              comment={comment}
+              video={video}
+              goToTime={goToTime}
+            />
           ))
         )}
       </div>

@@ -21,6 +21,7 @@ import Project, { ProjectVideosT, ProjectVideoT } from "@/src/API/project";
 import Video from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
 import VideoInput from "@/components/videoInput";
+import { useRouter } from "next/navigation";
 
 function ProjectPage({
   params,
@@ -43,6 +44,8 @@ function ProjectPage({
   const [videoTitle, setVideoTitle] = React.useState("");
   const [videoDescription, setVideoDescription] = React.useState("");
   const [videoUrl, setVideoUrl] = React.useState<File | null>(null);
+
+  const router = useRouter();
 
   React.useEffect(() => {
     Project.getProjectVideos(params.id, user)
@@ -104,6 +107,9 @@ function ProjectPage({
     onCreateClose,
   ]);
 
+  if (!user) {
+    router.push("/login");
+  }
   if (!project) {
     return <p>No project was found with this id</p>;
   }
@@ -114,7 +120,7 @@ function ProjectPage({
       <div className="flex flex-row flex-wrap justify-between items-center gap-4 mb-3">
         <div className="flex flex-row justify-center items-center gap-4">
           <Link href="/dashboard/project" color="foreground">
-            <h1 className="text-xl font-bold">{project.project}</h1>
+            <h1 className="text-xl font-bold">{project.title}</h1>
           </Link>
           <div>
             <Input

@@ -11,8 +11,9 @@ import { UserContext } from "@/utils/user-context";
 interface CommentProps {
   comment: CommentT;
   video: Video;
+  goToTime: (time: string) => void;
 }
-export default function Comment({ comment, video }: CommentProps) {
+export default function Comment({ comment, video, goToTime }: CommentProps) {
   const [isLiked, setIsLiked] = React.useState(false);
   const [likes, setLikes] = React.useState(comment.likes);
   const { user } = React.useContext(UserContext);
@@ -46,6 +47,10 @@ export default function Comment({ comment, video }: CommentProps) {
     }
   }, [isLiked, user, comment, video]);
 
+  const handleGoToTime = React.useCallback((time: string) => {
+    goToTime(time);
+  }, []);
+
   return (
     <div className="py-3 shadow-none flex flex-row gap-4 items-start">
       <Avatar src={comment.user.profileUrl} />
@@ -57,6 +62,30 @@ export default function Comment({ comment, video }: CommentProps) {
           </p>
         </div>
         <p className="text-sm">{comment.content}</p>
+        <div className="text-xs text-gray-400 mt-1">
+          <div>
+            Start:{" "}
+            {comment.start && (
+              <button
+                className="cursor-pointer bg-transparent border-none text-blue-500"
+                onClick={() => handleGoToTime(comment.start)}
+              >
+                {comment.start}
+              </button>
+            )}
+          </div>
+          <div>
+            End:{" "}
+            {comment.end && (
+              <button
+                className="cursor-pointer bg-transparent border-none text-blue-500"
+                onClick={() => handleGoToTime(comment.end)}
+              >
+                {comment.end}
+              </button>
+            )}
+          </div>
+        </div>
         <div className="mt-2 flex items-center gap-2">
           <div
             className="cursor-pointer"

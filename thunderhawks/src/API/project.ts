@@ -1,3 +1,4 @@
+import { title } from './../../components/primitives';
 import { UserContextT } from "@/utils/user-context";
 import { Endpoint } from "./endpoint";
 import { UserT } from "./user";
@@ -27,6 +28,7 @@ export type ProjectVideoT = {
 export type ProjectVideosT = {
   totalVideos: number;
   project: string;
+  title: string;
   videos: ProjectVideoT[];
 };
 export default class Project {

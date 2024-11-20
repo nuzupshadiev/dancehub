@@ -22,6 +22,7 @@ import Video from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
 import VideoInput from "@/components/videoInput";
 import { useRouter } from "next/navigation";
+import { Snippet } from "@nextui-org/react";
 
 function ProjectPage({
   params,
@@ -44,7 +45,7 @@ function ProjectPage({
   const [videoTitle, setVideoTitle] = React.useState("");
   const [videoDescription, setVideoDescription] = React.useState("");
   const [videoUrl, setVideoUrl] = React.useState<File | null>(null);
-
+  const [code, setCode] = React.useState("");
   const router = useRouter();
 
   React.useEffect(() => {
@@ -54,6 +55,9 @@ function ProjectPage({
         setVideos(project.videos);
       })
       .catch((err) => {});
+    Project.getProjectCode(params.id, user).then((project) => {
+      setCode(project.projectCode);
+    });
   }, [params.id, user]);
 
   const onSearchChange = React.useCallback((value?: string) => {
@@ -136,6 +140,11 @@ function ProjectPage({
           </div>
         </div>
         <div className="flex gap-4">
+          {code && (
+            <Snippet symbol="" size="md">
+              {code}
+            </Snippet>
+          )}
           <Button
             color="primary"
             size="md"

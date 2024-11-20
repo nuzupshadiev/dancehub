@@ -1,4 +1,4 @@
-import { title } from './../../components/primitives';
+import { title } from "./../../components/primitives";
 import { UserContextT } from "@/utils/user-context";
 import { Endpoint } from "./endpoint";
 import { UserT } from "./user";
@@ -142,6 +142,31 @@ export default class Project {
       },
       params: {
         userId: user.data.id,
+      },
+    }).then((resp) => resp.data);
+  }
+
+  static getProjectCode(
+    projectId: string,
+    user: UserContextT["user"]
+  ): Promise<{
+    project: "projectId";
+    projectCode: "projectCode";
+  }> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<{
+      project: "projectId";
+      projectCode: "projectCode";
+    }>("get", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/code/${projectId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        projectId: projectId,
       },
     }).then((resp) => resp.data);
   }

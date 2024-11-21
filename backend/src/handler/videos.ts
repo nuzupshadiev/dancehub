@@ -142,7 +142,7 @@ async function UploadVideo(req: Request, res: Response) {
   }
 
   const videoFile = req.file;
-  const videoUrl = `http://34.170.203.67:8000/static/videos/${videoFile.filename}`;
+  const videoUrl = `https://dancehub-backend.run.goorm.site/static/videos/${videoFile.filename}`;
 
   const version = new Date();
 
@@ -206,7 +206,7 @@ async function UpdateVideo(req: Request, res: Response) {
   }
 
   const videoFile = req.file;
-  const videoUrl = `http://34.170.203.67:8000/static/videos/${videoFile.filename}`;
+  const videoUrl = `https://dancehub-backend.run.goorm.site/static/videos/${videoFile.filename}`;
 
   const version = new Date();
 

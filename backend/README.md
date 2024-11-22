@@ -20,3 +20,14 @@ CODE_SALT=9999
 
 3. start the server with
    `$npm run dev`
+
+## Structure of the codebase
+src directory includes all core implementation code.
+### middleware
+This folder includes all middleware used in backend server (jwtMiddleware, uploader)
+### interfaces
+This folder includes definitions of types. However, type was not strictly applied to the project due to early deadline.
+### handler
+All api endpoints are directed to functions in handler. Handlers include all core feature implementation.
+### database
+Handles connection to database. Basically, all api endpoints use one pooled connection to mysql database.

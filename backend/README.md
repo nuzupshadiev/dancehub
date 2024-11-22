@@ -31,3 +31,5 @@ This folder includes definitions of types. However, type was not strictly applie
 All api endpoints are directed to functions in handler. Handlers include all core feature implementation.
 ### database
 Handles connection to database. Basically, all api endpoints use one pooled connection to mysql database.
+### index.ts
+Entry point of the project. Running this code initiates the whole backend server.

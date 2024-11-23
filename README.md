@@ -77,7 +77,7 @@ This directory contains components for managing comments.
   Displays the list or section of comments.
 
 - **description.tsx**  
-  Provides the description functionality for comments.
+  Provides the description functionality for videos.
 
 - **mentionText.tsx**  
   Handles mention-related text functionality.

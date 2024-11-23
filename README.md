@@ -40,6 +40,64 @@ Handles connection to database. Basically, all api endpoints use one pooled conn
 
 Entry point of the project. Running this code initiates the whole backend server.
 
+## Frontend
+The `/frontend` directory includes all client-side implementation code.
+
+- **login/**  
+  Contains components and logic related to the login functionality.
+
+- **projects/**  
+  Contains components and logic for project-related features.
+
+- **register/**  
+  Includes components for user registration.
+
+- **video/[id]/**  
+  Handles dynamic routing and components for video-related functionality.
+
+- **error.tsx**  
+  Displays error pages and manages error handling.
+
+- **layout.tsx**  
+  Provides the layout structure for the application.
+
+- **page.tsx**  
+  Serves as the main page component of the application.
+
+- **providers.tsx**  
+  Manages global providers for context or dependency injection.
+
+## Comments
+This directory contains components for managing comments.
+
+- **comment.tsx**  
+  Represents individual comment components.
+
+- **comments.tsx**  
+  Displays the list or section of comments.
+
+- **description.tsx**  
+  Provides the description functionality for comments.
+
+- **mentionText.tsx**  
+  Handles mention-related text functionality.
+
+- **page.tsx**  
+  Serves as the main comments section page.
+
+## Projects
+Manages components related to projects.
+
+- **[id]/**  
+  Dynamic routing for project details.
+
+- **page.tsx**  
+  Main projects page component.
+
+- **project-item.tsx**  
+  Represents individual project item components.
+
+
 ---
 
 ## Getting Started

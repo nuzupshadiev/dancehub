@@ -18,29 +18,29 @@ DanceHub is a collaborative platform built for choreographers and dance teams to
 
 ### Backend
 
-/backend/src directory includes all core implementation code.
+`/backend/src` directory includes all core implementation code.
 
-#### middleware
+- **middleware/**
 
-This folder includes all middleware used in backend server (jwtMiddleware, uploader)
+  This folder includes all middleware used in backend server (jwtMiddleware, uploader)
 
-#### interfaces
+- **interfaces/**
 
-This folder includes definitions of types. However, type was not strictly applied to the project due to early deadline.
+  This folder includes definitions of types. However, type was not strictly applied to the project due to early deadline.
 
-#### handler
+- **handler/**
 
-All api endpoints are directed to functions in handler. Handlers include all core feature implementation.
+  All api endpoints are directed to functions in handler. Handlers include all core feature implementation.
 
-#### database
+- **database/**
 
-Handles connection to database. Basically, all api endpoints use one pooled connection to mysql database.
+  Handles connection to database. Basically, all api endpoints use one pooled connection to mysql database.
 
-#### index.ts
+- **index.ts**
 
-Entry point of the project. Running this code initiates the whole backend server.
+  Entry point of the project. Running this code initiates the whole backend server.
 
-## Frontend
+### Frontend
 The `/frontend` directory includes all client-side implementation code.
 
 - **login/**  
@@ -67,7 +67,7 @@ The `/frontend` directory includes all client-side implementation code.
 - **providers.tsx**  
   Manages global providers for context or dependency injection.
 
-## Comments
+#### Comments
 This directory contains components for managing comments.
 
 - **comment.tsx**  
@@ -85,7 +85,7 @@ This directory contains components for managing comments.
 - **page.tsx**  
   Serves as the main comments section page.
 
-## Projects
+#### Projects
 Manages components related to projects.
 
 - **[id]/**  

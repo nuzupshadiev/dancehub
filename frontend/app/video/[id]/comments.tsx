@@ -12,11 +12,13 @@ interface CommentsSectionProps {
   video: Video;
   goToTime: (time: string) => void;
   isFiltered: boolean;
+  secondsElapsed: number;
 }
 export default function CommentsSection({
   video,
   goToTime,
   isFiltered,
+  secondsElapsed,
 }: CommentsSectionProps) {
   const [commentsList, setCommentsList] = useState<Array<CommentT>>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -67,7 +69,18 @@ export default function CommentsSection({
     if (isFiltered) {
       return text.content.includes(`@${user?.data.name}`);
     }
+
     return true;
+  });
+
+  const inTimeTexts = filteredTexts.filter((text) => {
+    const [startMin, startSec] = text.start.split(":").map(Number);
+    const [endMin, endSec] = text.end.split(":").map(Number);
+    const seconds = Math.floor(secondsElapsed);
+
+    return (
+      seconds >= startMin * 60 + startSec && seconds <= endMin * 60 + endSec
+    );
   });
 
   if (!user) return null;
@@ -120,10 +133,10 @@ export default function CommentsSection({
         </div>
       </div>
       <div className="">
-        {filteredTexts.length === 0 ? (
+        {inTimeTexts.length === 0 ? (
           <p className="py-4">No comments yet. Be the first to comment!</p>
         ) : (
-          filteredTexts.map((comment) => (
+          inTimeTexts.map((comment) => (
             <Comment
               key={comment.id}
               comment={comment}

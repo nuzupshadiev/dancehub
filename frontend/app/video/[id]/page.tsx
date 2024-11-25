@@ -11,6 +11,7 @@ import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { Select, SelectItem, Selection } from "@nextui-org/react";
+import { OnProgressProps } from "react-player/base";
 function VideoPage({
   params,
 }: {
@@ -23,6 +24,8 @@ function VideoPage({
   const [isLiked, setIsLiked] = React.useState(false);
   const [likes, setLikes] = React.useState(0);
   const [isFiltered, setIsFiltered] = React.useState(false);
+  const [secondsElapsed, setSecondsElapsed] = React.useState(0);
+
   const playerRef = useRef(null);
 
   const router = useRouter();
@@ -84,6 +87,10 @@ function VideoPage({
     setIsFiltered((prev) => !prev);
   }, []);
 
+  const handleOnProgress = React.useCallback((state: OnProgressProps) => {
+    setSecondsElapsed(state.playedSeconds);
+  }, []);
+
   if (!user) {
     return <p>You need to be logged in to view this page</p>;
     // router.push("/login");
@@ -101,6 +108,7 @@ function VideoPage({
           width={"100%"}
           height={"100%"}
           controls
+          onProgress={handleOnProgress}
         />
         <div className="flex flex-row justify-between max-w-7xl">
           <h1 className="text-xl font-bold">{video.data.title}</h1>
@@ -131,6 +139,7 @@ function VideoPage({
       <div className="flex flex-col max-w-7xl">
         <DescriptionSection video={video} />
         <CommentsSection
+          secondsElapsed={secondsElapsed}
           video={video}
           goToTime={goToTime}
           isFiltered={isFiltered}

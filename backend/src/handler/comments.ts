@@ -58,7 +58,7 @@ async function GetComments(req: Request, res: Response) {
     let replies = [];
 
     const [repliesData] = await pool.query<RowDataPacket[]>(
-      `select * from reply
+      `select reply.id as id, commentId, userId, name, profilePicture, content, modifiedAt, likes from reply
       inner join user on reply.userId = user.id
       where commentId = ?`,
       [comment.id]
@@ -74,7 +74,7 @@ async function GetComments(req: Request, res: Response) {
           profileUrl: reply.profilePicture,
         },
         content: reply.content,
-        likes: 0,
+        likes: reply.likes,
         modifiedAt: reply.modifiedAt,
       });
     }
@@ -147,7 +147,7 @@ async function AddComment(req: Request, res: Response) {
   const comment = commentData[0];
 
   const commentResponse = {
-    id: comment.id,
+    id: insertId,
     videoId: comment.videoId,
     version: comment.version,
     start: comment.start,
@@ -179,7 +179,9 @@ async function UpdateComment(req: Request, res: Response) {
     return res.status(404).json({ message: "Comment not found" });
   }
 
-  if (commentData[0].videoId !== videoId) {
+  if (commentData[0].videoId != videoId) {
+    console.log(commentData[0].videoId);
+    console.log(videoId);
     return res
       .status(404)
       .json({ message: "Comment not found. videoId may be wrong." });
@@ -197,8 +199,8 @@ async function UpdateComment(req: Request, res: Response) {
   }
 
   if (
-    commentData[0].userId !== req.user!.id &&
-    req.user!.id !== videoData[0].administratorId
+    commentData[0].userId != req.user!.id &&
+    req.user!.id != videoData[0].administratorId
   ) {
     return res.status(403).json({ message: "Unauthorized to update comment" });
   }
@@ -285,7 +287,7 @@ async function DeleteComment(req: Request, res: Response) {
   const administratorId = videoData[0].administratorId;
 
   // check if user is authorized to delete comment
-  if (comment.userId !== userId && userId !== administratorId) {
+  if (comment.userId != userId && userId != administratorId) {
     return res.status(403).json({ message: "Unauthorized to delete comment" });
   }
 

@@ -22,20 +22,46 @@ import Video, { CommentT } from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
 import MentionText from "./mentionText";
 import TimeInput from "@/components/timeinput";
+import CommentInput from "@/components/commentInput";
+import HighlightText from "@/components/highlightedText";
+import ReplyComment from "./replyComment";
 
 interface CommentProps {
   comment: CommentT;
   video: Video;
   goToTime: (time: string) => void;
+  deleteComment: (commentId: string) => void;
 }
-export default function Comment({ comment, video, goToTime }: CommentProps) {
+export default function Comment({
+  comment,
+  video,
+  goToTime,
+  deleteComment,
+}: CommentProps) {
   const [isLiked, setIsLiked] = React.useState(false);
   const [likes, setLikes] = React.useState(comment.likes);
   const { user } = React.useContext(UserContext);
 
   const [isReplying, setIsReplying] = React.useState(false);
   const [replyText, setReplyText] = React.useState("");
-  const [replyComments, setReplyComments] = React.useState<Array<CommentT>>([]);
+  const [replyComments, setReplyComments] = React.useState<Array<CommentT>>([
+    {
+      id: "1",
+      content: "This is a reply",
+      start: "0:00",
+      end: "0:10",
+      likes: 0,
+      likedBy: [],
+      user: {
+        id: "1",
+        name: "nuzup",
+        profileUrl: "https://i.pravatar.cc/150?img=1",
+      },
+      videoId: "1",
+      version: "1",
+      modifiedAt: new Date().toISOString(),
+    },
+  ]);
   const [isReplyCommentShown, setIsReplyCommentShown] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   const [value, setValue] = React.useState(comment.content);
@@ -92,33 +118,19 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
     ) {
       return;
     }
-    // Video.editComment(
-    //   {
-    //     start: `${Number(startMinutes)}:${Number(startSeconds)}`,
-    //     end: `${Number(endMinutes)}:${Number(endSeconds)}`,
-    //     content: value,
-    //   },
-    //   comment.id,
-    //   video.data.id,
-    //   user
-    // ).then((editedComment) => {
-    //   setValue(editedComment.content);
-    //   setStartMinutes(editedComment.start.split(":")[0]);
-    //   setStartSeconds(editedComment.start.split(":")[1]);
-    //   setEndMinutes(editedComment.end.split(":")[0]);
-    //   setEndSeconds(editedComment.end.split(":")[1]);
-    // });
-    // setIsEditing(false);
-  }, []);
-
-  const handleDeleteComment = React.useCallback(() => {
-    if (!user) {
-      return;
-    }
-    // Video.deleteComment(user, comment.id, video.data.id).then(() => {
-    //   // setCommentsList((prev) => prev.filter((c) => c.id !== comment.id));
-    // });
-  }, []);
+    Video.editComment(user, comment.id, video.data.id, {
+      start: `${Number(startMinutes)}:${Number(startSeconds)}`,
+      end: `${Number(endMinutes)}:${Number(endSeconds)}`,
+      content: value,
+    }).then((editedComment) => {
+      setValue(editedComment.content);
+      setStartMinutes(editedComment.start.split(":")[0]);
+      setStartSeconds(editedComment.start.split(":")[1]);
+      setEndMinutes(editedComment.end.split(":")[0]);
+      setEndSeconds(editedComment.end.split(":")[1]);
+    });
+    setIsEditing(false);
+  }, [value, startMinutes, startSeconds, endMinutes, endSeconds, user]);
 
   const handleCancelEditComment = React.useCallback(() => {
     setValue(comment.content);
@@ -127,6 +139,26 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
     setEndMinutes(comment.end.split(":")[0]);
     setEndSeconds(comment.end.split(":")[1]);
     setIsEditing(false);
+  }, []);
+
+  const handleReplySubmit = React.useCallback(() => {
+    if (!user || !replyText) {
+      return;
+    }
+
+    Video.replyToComment(user, comment.id, video.data.id, replyText)
+      .then((reply) => {
+        setReplyComments((prev) => [...prev, reply]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [replyText, user, comment, video]);
+
+  const deleteReply = React.useCallback((id: string) => {
+    Video.deleteReply(user, comment.id, video.data.id, id).then(() => {
+      setReplyComments((prev) => prev.filter((reply) => reply.id !== id));
+    });
   }, []);
 
   return (
@@ -141,14 +173,22 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
         </div>
         {isEditing ? (
           <div className="flex-1">
-            <Input
+            <CommentInput
+              value={value}
+              onChangeValue={setValue}
+              fullWidth
+              placeholder="Add a public comment..."
+              size="sm"
+              variant="underlined"
+            />
+            {/* <Input
               fullWidth
               placeholder="Add a public comment..."
               size="sm"
               value={value}
               variant="underlined"
               onValueChange={setValue}
-            />
+            /> */}
             <div className="flex gap-2 mt-2 justify-end">
               <div className="flex gap-2 items-center">
                 from
@@ -182,7 +222,9 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
         ) : (
           <div>
             <div>
-              <MentionText text={value} />
+              <HighlightText text={value} />
+              {/* <MentionText text={value} /> */}
+              {/* <MentionText text={value} /> */}
             </div>
             <div className="text-xs text-gray-400 mt-1">
               <div>
@@ -239,31 +281,34 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
         </div>
         {isReplying && (
           <div className="mt-2 w-full flex flex-col gap-2">
-            <Input
+            <CommentInput
+              fullWidth
+              value={replyText}
+              onChangeValue={setReplyText}
+              placeholder="Add a reply..."
+              size="sm"
+              variant="underlined"
+            />
+            {/* <Input
               fullWidth
               placeholder="Add a reply..."
               size="sm"
               value={replyText}
               variant="underlined"
               onValueChange={setReplyText}
-            />
+            /> */}
             <div className="flex flex-row justify-end gap-2">
               <Button size="sm" onPress={() => setIsReplying(false)}>
                 Cancel
               </Button>
-              <Button
-                color="primary"
-                // disabled={!commentText.trim()}
-                size="sm"
-                // onPress={handleCommentSubmit}
-              >
+              <Button color="primary" size="sm" onPress={handleReplySubmit}>
                 Reply
               </Button>
             </div>
           </div>
         )}
         <div className="mt-2">
-          {replyComments.length === 0 && (
+          {replyComments.length > 0 && (
             <Button
               size="sm"
               className="w-fit"
@@ -281,11 +326,13 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
           )}
           {isReplyCommentShown &&
             replyComments.map((replyComment) => (
-              <Comment
+              <ReplyComment
                 key={replyComment.id}
                 comment={replyComment}
-                video={video}
-                goToTime={goToTime}
+                deleteComment={deleteComment}
+                commentId={comment.id}
+                videoId={video.data.id}
+                deleteReply={deleteReply}
               />
             ))}
         </div>
@@ -294,7 +341,7 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
       <div>
         <Dropdown>
           <DropdownTrigger>
-            <Button variant="light" isIconOnly radius="full">
+            <Button isIconOnly radius="full" variant="light">
               <FontAwesomeIcon icon={faEllipsisVertical} />
             </Button>
           </DropdownTrigger>
@@ -302,7 +349,7 @@ export default function Comment({ comment, video, goToTime }: CommentProps) {
             <DropdownItem key="new" onPress={() => setIsEditing(true)}>
               Edit
             </DropdownItem>
-            <DropdownItem key="copy" onPress={handleDeleteComment}>
+            <DropdownItem key="copy" onPress={() => deleteComment(comment.id)}>
               Delete
             </DropdownItem>
           </DropdownMenu>

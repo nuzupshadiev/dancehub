@@ -21,6 +21,7 @@ import ProjectItem from "./project-item";
 import Project, { ProjectT } from "@/src/API/project";
 import { UserContext } from "@/utils/user-context";
 import { useRouter } from "next/navigation";
+import CommentInput, { Suggestion } from "@/components/commentInput";
 function Page() {
   const {
     isOpen: isJoinOpen,
@@ -41,6 +42,22 @@ function Page() {
   const [projectName, setProjectName] = React.useState("");
   const [joinCode, setJoinCode] = React.useState("");
   const { user } = React.useContext(UserContext);
+
+  // Delete later
+  const [commentValue, setCommentValue] = React.useState("");
+  const mentionSuggestions: Suggestion[] = [
+    { id: "1", label: "@john_doe" },
+    { id: "2", label: "@jane_doe" },
+    { id: "3", label: "@developer" },
+  ];
+
+  const tagSuggestions: Suggestion[] = [
+    { id: "4", label: "#react" },
+    { id: "5", label: "#javascript" },
+    { id: "6", label: "#nextjs" },
+  ];
+
+  //
 
   useEffect(() => {
     // fetch projects from server
@@ -226,6 +243,13 @@ function Page() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <CommentInput
+        mentionSuggestions={mentionSuggestions}
+        tagSuggestions={tagSuggestions}
+        value={commentValue}
+        onChangeValue={setCommentValue}
+        // onChange={setCommentValue}
+      />
     </div>
   );
 }

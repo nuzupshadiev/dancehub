@@ -8,17 +8,20 @@ import TimeInput from "@/components/timeinput";
 import Video, { CommentT } from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
 import { Selection } from "@nextui-org/react";
+import CommentInput from "@/components/commentInput";
 interface CommentsSectionProps {
   video: Video;
   goToTime: (time: string) => void;
-  isFiltered: boolean;
   secondsElapsed: number;
+  projectId: string;
+  selectedUsers: Selection;
 }
 export default function CommentsSection({
   video,
   goToTime,
-  isFiltered,
   secondsElapsed,
+  projectId,
+  selectedUsers,
 }: CommentsSectionProps) {
   const [commentsList, setCommentsList] = useState<Array<CommentT>>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -66,11 +69,10 @@ export default function CommentsSection({
   }, [user, commentText, startMinutes, startSeconds, endMinutes, endSeconds]);
 
   const filteredTexts = commentsList.filter((text) => {
-    if (isFiltered) {
-      return text.content.includes(`@${user?.data.name}`);
-    }
+    if (selectedUsers === "all") return true;
+    else if (selectedUsers.size === 0) return true;
 
-    return true;
+    return text.content.includes(`@${selectedUsers.values().next().value}`);
   });
 
   const inTimeTexts = filteredTexts.filter((text) => {
@@ -83,6 +85,18 @@ export default function CommentsSection({
     );
   });
 
+  const handleDeleteComment = React.useCallback((commendId: string) => {
+    Video.deleteComment(user, commendId, video.data.id)
+      .then(() => {
+        setCommentsList((prev) =>
+          prev.filter((comment) => comment.id !== commendId)
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
   if (!user) return null;
 
   return (
@@ -90,7 +104,13 @@ export default function CommentsSection({
       <div className="py-4 flex flex-row gap-4 items-start">
         <Avatar src={user.data.profilePicture} />{" "}
         <div className="flex-1">
-          <Input
+          <CommentInput
+            fullWidth
+            value={commentText}
+            onChangeValue={setCommentText}
+            onFocus={() => setIsTyping(true)}
+          />
+          {/* <Input
             fullWidth
             placeholder="Add a public comment..."
             size="sm"
@@ -98,7 +118,7 @@ export default function CommentsSection({
             variant="underlined"
             onFocus={() => setIsTyping(true)}
             onValueChange={setCommentText}
-          />
+          /> */}
           {isTyping && (
             <div className="flex gap-2 mt-2 justify-end">
               <div className="flex gap-2 items-center">
@@ -134,14 +154,18 @@ export default function CommentsSection({
       </div>
       <div className="">
         {inTimeTexts.length === 0 ? (
-          <p className="py-4">No comments yet. Be the first to comment!</p>
+          <p className="py-4">
+            No comments yet or No comments for this part of the video yet. Be
+            the first to comment!
+          </p>
         ) : (
           inTimeTexts.map((comment) => (
             <Comment
               key={comment.id}
               comment={comment}
-              video={video}
+              deleteComment={handleDeleteComment}
               goToTime={goToTime}
+              video={video}
             />
           ))
         )}

@@ -46,12 +46,15 @@ export default class Project {
       headers: {
         Authorization: `Bearer ${user.token}`,
       },
-      params: {
-        userId: user.data.id,
-      },
     });
   }
-  update(user: UserContextT["user"], payload: ProjectT): Promise<Project> {
+  update(
+    user: UserContextT["user"],
+    payload: {
+      title?: string;
+      administrator?: string;
+    }
+  ): Promise<Project> {
     if (!user) {
       return Promise.reject("No user provided");
     }
@@ -61,9 +64,6 @@ export default class Project {
       data: payload,
       headers: {
         Authorization: `Bearer ${user.token}`,
-      },
-      params: {
-        userId: user.data.id,
       },
     }).then((resp) => new Project(resp.data));
   }
@@ -169,5 +169,41 @@ export default class Project {
         projectId: projectId,
       },
     }).then((resp) => resp.data);
+  }
+
+  static deleteProject(
+    projectId: string,
+    user: UserContextT["user"]
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("delete", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/${projectId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
+  }
+  static updateProject(
+    projectId: string,
+    user: UserContextT["user"],
+    payload: {
+      title?: string;
+      administrator?: string;
+    }
+  ): Promise<Project> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<ProjectResponseT>("put", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/${projectId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      data: payload,
+    }).then((resp) => new Project(resp.data.project));
   }
 }

@@ -1,17 +1,31 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import ReactPlayer from "react-player";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHeart } from "@fortawesome/free-regular-svg-icons";
+import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/navigation";
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Select,
+  SelectItem,
+  Selection,
+  useDisclosure,
+} from "@nextui-org/react";
+import { OnProgressProps } from "react-player/base";
+
 import CommentsSection from "./comments";
 import DescriptionSection from "./description";
 
 import * as VideoAPI from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart } from "@fortawesome/free-regular-svg-icons";
-import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/navigation";
-import { Select, SelectItem, Selection } from "@nextui-org/react";
-import { OnProgressProps } from "react-player/base";
+import { UserT } from "@/src/API/user";
+import VideoInput from "@/components/videoInput";
 function VideoPage({
   params,
 }: {
@@ -19,16 +33,49 @@ function VideoPage({
     id: string;
   };
 }) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   const { user } = React.useContext(UserContext);
   const [video, setVideo] = React.useState<VideoAPI.default | null>(null);
   const [isLiked, setIsLiked] = React.useState(false);
   const [likes, setLikes] = React.useState(0);
-  const [isFiltered, setIsFiltered] = React.useState(false);
   const [secondsElapsed, setSecondsElapsed] = React.useState(0);
-
+  const [projectId, setProjectId] = React.useState("");
+  const [videoUrl, setVideoUrl] = React.useState<File | null>(null);
+  const [selectedUsers, setSelectedUsers] = React.useState<Selection>(
+    new Set([])
+  );
+  const [selectedVersions, setSelectedVersions] = React.useState<Selection>(
+    new Set([])
+  );
+  const [videoVersions, setVideoVersions] = React.useState<string[]>([
+    "123asd",
+    "123asda",
+    "123as2d",
+  ]);
+  const [usersInTheProject, setUsersInTheProject] = React.useState<UserT[]>([
+    {
+      id: "1",
+      name: "nuzup",
+      profileUrl:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqiGDWxu58BS_M9_hloRMYzZ_f7LMEs8a6qA&s",
+    },
+    {
+      id: "2",
+      name: "John Doe",
+      profileUrl: "https://randomuser.me/api/portraits",
+    },
+    {
+      id: "3",
+      name: "Jane Doe",
+      profileUrl: "https://randomuser.me/api/portraits",
+    },
+  ]);
   const playerRef = useRef(null);
 
-  const router = useRouter();
+  React.useEffect(() => {
+    setVideoUrl(null);
+  }, [onOpenChange]);
 
   React.useEffect(() => {
     if (!user) {
@@ -83,12 +130,21 @@ function VideoPage({
     }
   }, []);
 
-  const handleSelectionChange = React.useCallback((value: Selection) => {
-    setIsFiltered((prev) => !prev);
+  const handleSelectVersion = React.useCallback((selected: Selection) => {
+    setSelectedVersions(selected);
+    if (selected === "all" || selected.size === 0) return;
+    // VideoAPI.default
+    //   .getVideoVersion(params.id, user, selected.values().next().value)
+    //   .then((video) => {
+    //     setVideo(video);
+    //   });
   }, []);
-
   const handleOnProgress = React.useCallback((state: OnProgressProps) => {
     setSecondsElapsed(state.playedSeconds);
+  }, []);
+
+  const onVideoUploadHandler = React.useCallback(() => {
+    // create new video
   }, []);
 
   if (!user) {
@@ -104,47 +160,100 @@ function VideoPage({
       <div className="flex flex-col gap-2">
         <ReactPlayer
           ref={playerRef}
+          controls
+          height={"100%"}
           url={video.data.videoUrl}
           width={"100%"}
-          height={"100%"}
-          controls
           onProgress={handleOnProgress}
         />
         <div className="flex flex-row justify-between max-w-7xl">
           <h1 className="text-xl font-bold">{video.data.title}</h1>
-          <div
-            className="flex flex-row cursor-pointer gap-2 items-center"
-            role="button"
-            tabIndex={0}
-            onClick={handleLike}
-          >
+          <div className="flex flex-row gap-2 items-center">
+            <Button size="sm" onClick={onOpen}>
+              Upload new version
+            </Button>
             <Select
+              className="w-40"
+              placeholder="Select version"
+              selectedKeys={selectedVersions}
               size="sm"
               variant="bordered"
-              placeholder="Filter comments"
-              className="w-40"
-              onSelectionChange={handleSelectionChange}
+              onSelectionChange={handleSelectVersion}
             >
-              <SelectItem key={"me"}>{`@${user.data.name}`}</SelectItem>
+              {videoVersions.map((version) => (
+                <SelectItem key={version} value={version}>
+                  {version}
+                </SelectItem>
+              ))}
             </Select>
-            {isLiked ? (
-              <FontAwesomeIcon icon={faHeartSolid} color="red" />
-            ) : (
-              <FontAwesomeIcon icon={faHeart} />
-            )}
-            <p>{likes}</p>
+            <Select
+              className="w-40"
+              placeholder="Filter comments"
+              selectedKeys={selectedUsers}
+              size="sm"
+              variant="bordered"
+              onSelectionChange={setSelectedUsers}
+            >
+              {usersInTheProject.map((user) => (
+                <SelectItem key={user.name} value={user.name}>
+                  {user.name}
+                </SelectItem>
+              ))}
+            </Select>
+            <div
+              className="flex flex-row gap-2 items-center cursor-pointer"
+              role="button"
+              tabIndex={0}
+              onClick={handleLike}
+            >
+              {isLiked ? (
+                <FontAwesomeIcon color="red" icon={faHeartSolid} />
+              ) : (
+                <FontAwesomeIcon icon={faHeart} />
+              )}
+              <p>{likes}</p>
+            </div>
           </div>
         </div>
       </div>
       <div className="flex flex-col max-w-7xl">
         <DescriptionSection video={video} />
         <CommentsSection
-          secondsElapsed={secondsElapsed}
-          video={video}
           goToTime={goToTime}
-          isFiltered={isFiltered}
+          projectId={projectId}
+          secondsElapsed={secondsElapsed}
+          selectedUsers={selectedUsers}
+          video={video}
         />
       </div>
+
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>{"Upload a new version of the video"} </ModalHeader>
+              <ModalBody>
+                <VideoInput
+                  setVideoSource={setVideoUrl}
+                  videoSource={videoUrl}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onOpenChange}>
+                  {"Cancel"}
+                </Button>
+                <Button
+                  color="primary"
+                  variant="solid"
+                  onPress={onVideoUploadHandler}
+                >
+                  {"Upload"}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

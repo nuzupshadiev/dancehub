@@ -18,6 +18,7 @@ export type CommentT = {
 };
 
 export type VideoT = {
+  project: string;
   id: string;
   title: string;
   description: string;
@@ -52,6 +53,12 @@ type VideoResponseT = {
   message: string;
   video: VideoT;
 };
+
+type ReplyResponseT = {
+  message: string;
+  reply: CommentT;
+};
+
 export default class Video {
   data: VideoT;
   constructor(data: VideoT) {
@@ -107,7 +114,7 @@ export default class Video {
 
   static createVideo(
     payload: FormData,
-    user: UserContextT["user"],
+    user: UserContextT["user"]
   ): Promise<Video> {
     if (!user) {
       return Promise.reject(new Error("No user provided"));
@@ -130,7 +137,7 @@ export default class Video {
       end: string;
     },
     videoId: string,
-    user: UserContextT["user"],
+    user: UserContextT["user"]
   ): Promise<CommentCreateT> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -156,7 +163,7 @@ export default class Video {
 
   static getComments(
     videoId: string,
-    user: UserContextT["user"],
+    user: UserContextT["user"]
   ): Promise<CommentT[]> {
     if (!user) {
       return Promise.resolve([]);
@@ -176,7 +183,7 @@ export default class Video {
   static likeComment(
     user: UserContextT["user"],
     commentId: string,
-    videoId: string,
+    videoId: string
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -197,7 +204,7 @@ export default class Video {
   static unlikeComment(
     user: UserContextT["user"],
     commentId: string,
-    videoId: string,
+    videoId: string
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -217,7 +224,7 @@ export default class Video {
 
   static likeVideo(
     user: UserContextT["user"],
-    videoId: string,
+    videoId: string
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -236,7 +243,7 @@ export default class Video {
 
   static unlikeVideo(
     user: UserContextT["user"],
-    videoId: string,
+    videoId: string
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -249,6 +256,171 @@ export default class Video {
       },
       params: {
         videoId: videoId,
+      },
+    });
+  }
+
+  static replyToComment(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string,
+    replyText: string
+  ): Promise<CommentT> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<ReplyResponseT>("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}/replies`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        videoId: videoId,
+      },
+      data: {
+        content: replyText,
+      },
+    }).then((resp) => resp.data.reply);
+  }
+  static deleteComment(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("delete", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        commentId: commentId,
+      },
+    });
+  }
+
+  static editComment(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string,
+    payload: {
+      content: string;
+      start: string;
+      end: string;
+    }
+  ): Promise<CommentT> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<CommentCreateT>("put", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        commentId: commentId,
+        videoId: videoId,
+      },
+      data: {
+        content: payload.content,
+        start: payload.start,
+        end: payload.end,
+      },
+    }).then((resp) => resp.data.comment);
+  }
+
+  static likeReply(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string,
+    replyId: string
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}/replies/${replyId}/like`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        commentId: commentId,
+        videoId: videoId,
+        replyId: replyId,
+      },
+    });
+  }
+  static unlikeReply(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string,
+    replyId: string
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("post", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}/replies/${replyId}/unlike`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        commentId: commentId,
+        videoId: videoId,
+        replyId: replyId,
+      },
+    });
+  }
+  static updateReply(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string,
+    replyId: string,
+    content: string
+  ): Promise<CommentT> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<ReplyResponseT>("put", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}/replies/${replyId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        commentId: commentId,
+        videoId: videoId,
+      },
+      data: {
+        content: content,
+      },
+    }).then((resp) => resp.data.reply);
+  }
+
+  static deleteReply(
+    user: UserContextT["user"],
+    commentId: string,
+    videoId: string,
+    replyId: string
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("delete", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${videoId}/comments/${commentId}/replies/${replyId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        commentId: commentId,
       },
     });
   }

@@ -120,6 +120,7 @@ app.post(
 );
 
 // Projects API routes
+app.get("/api/projects/:projectId", jwtMiddleware, projects.GetProject);
 app.get("/api/projects", jwtMiddleware, projects.GetProjects);
 app.post("/api/projects", jwtMiddleware, projects.AddProject);
 app.put("/api/projects/:projectId", jwtMiddleware, projects.UpdateProject);

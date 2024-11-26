@@ -3,6 +3,68 @@ import { pool } from "../database/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import dotenv from "dotenv";
 
+async function GetProject(req: Request, res: Response) {
+  const projectId = req.params.projectId;
+
+  // get project
+  const [projectData] = await pool.query<RowDataPacket[]>(
+    "select * from project where id = ?",
+    [projectId]
+  );
+  if (projectData.length === 0) {
+    return res.status(404).json({ message: "Project not found" });
+  }
+  const project = projectData[0];
+
+  const [administratorData] = await pool.query<RowDataPacket[]>(
+    "select * from user where id = ?",
+    [project.administratorId]
+  );
+  const administrator = {
+    id: administratorData[0].id,
+    name: administratorData[0].name,
+    profileUrl: administratorData[0].profilePicture,
+  };
+
+  const [memberData] = await pool.query<RowDataPacket[]>(
+    `select * from member
+      inner join user on member.userId = user.id
+      where projectId = ?`,
+    [projectId]
+  );
+  const members = memberData.map((row) => {
+    return {
+      id: row.id,
+      name: row.name,
+      profileUrl: row.profilePicture,
+    };
+  });
+
+  const [videosData] = await pool.query<RowDataPacket[]>(
+    "select * from video where projectId = ?",
+    [projectId]
+  );
+  const videos = videosData.map((row) => {
+    return {
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      videoUrl: row.videoUrl,
+      version: row.version,
+    };
+  });
+
+  res.status(200).json({
+    project: {
+      id: project.id,
+      title: project.title,
+      administrator: administrator,
+      members: members,
+      videos: videos,
+    },
+  });
+}
+
 async function GetProjects(req: Request, res: Response) {
   const userId = req.user!.id;
 
@@ -55,7 +117,7 @@ async function GetProjects(req: Request, res: Response) {
         title: row.title,
         description: row.description,
         videoUrl: row.videoUrl,
-        createdAt: row.createdAt,
+        version: row.version,
       };
     });
 
@@ -278,6 +340,7 @@ async function GetProjectCode(req: Request, res: Response) {
 }
 
 export {
+  GetProject,
   GetProjects,
   AddProject,
   UpdateProject,

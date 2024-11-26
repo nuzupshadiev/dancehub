@@ -19,10 +19,10 @@ app.use(cors());
 // Middleware to parse JSON requests
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.json({
-        message: "server is now working"
-    });
+app.get("/", (req, res) => {
+  res.json({
+    message: "server is now working",
+  });
 });
 
 // Serve static files (e.g., videos, images)
@@ -132,6 +132,7 @@ app.post(
   jwtMiddleware,
   projects.JoinProject
 );
+app.delete("/api/projects/:projectId", jwtMiddleware, projects.DeleteProject);
 
 // Start the server
 app.listen(config.port, () => {

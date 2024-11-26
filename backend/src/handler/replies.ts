@@ -64,7 +64,7 @@ async function UpdateReply(req: Request, res: Response) {
     return res.status(404).json({ message: "Reply not found" });
   }
 
-  if (replyData[0].userId !== userId) {
+  if (replyData[0].userId != userId) {
     return res.status(403).json({ message: "Forbidden" });
   }
 
@@ -101,7 +101,7 @@ async function DeleteReply(req: Request, res: Response) {
     return res.status(404).json({ message: "Reply not found" });
   }
 
-  if (replyData[0].userId !== userId) {
+  if (replyData[0].userId != userId) {
     return res.status(403).json({ message: "Forbidden" });
   }
 

@@ -53,7 +53,7 @@ async function GetProfile(req: Request, res: Response) {
 async function UpdateProfile(req: Request, res: Response) {
   const userId = req.params.userId;
   const user = req.user;
-  if (user!.id !== Number(userId)) {
+  if (user!.id != Number(userId)) {
     return res.status(403).json({ message: "Forbidden" });
   }
 

@@ -275,7 +275,7 @@ async function DeleteVideo(req: Request, res: Response) {
   }
 
   const userId = videoData[0].uploaderId;
-  if (user!.id !== userId) {
+  if (user!.id != userId) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 

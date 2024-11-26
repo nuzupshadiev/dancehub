@@ -199,6 +199,25 @@ async function UpdateProject(req: Request, res: Response) {
   });
 }
 
+async function DeleteProject(req: Request, res: Response) {
+  const userId = req.user!.id;
+  const projectId = req.params.projectId;
+
+  // check if user is administrator
+  const [projectData] = await pool.query<RowDataPacket[]>(
+    "select * from project where id = ? and administratorId = ?",
+    [projectId, userId]
+  );
+  if (projectData.length === 0) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  // delete project
+  await pool.query("delete from project where id = ?", [projectId]);
+
+  res.status(200).json({ message: "Project deleted successfully" });
+}
+
 async function JoinProject(req: Request, res: Response) {
   const user = req.user!;
   const encoded = req.params.projectCode;
@@ -258,4 +277,11 @@ async function GetProjectCode(req: Request, res: Response) {
   res.status(200).json({ project: projectId, projectCode: projectCode });
 }
 
-export { GetProjects, AddProject, UpdateProject, JoinProject, GetProjectCode };
+export {
+  GetProjects,
+  AddProject,
+  UpdateProject,
+  JoinProject,
+  GetProjectCode,
+  DeleteProject,
+};

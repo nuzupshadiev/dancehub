@@ -41,7 +41,12 @@ async function GetProject(req: Request, res: Response) {
   });
 
   const [videosData] = await pool.query<RowDataPacket[]>(
-    "select * from video where projectId = ?",
+    `
+      select * from video
+      inner join (select id, MAX(version) as version from video
+      where projectId = ?
+      group by id) as latest
+      on video.id = latest.id and video.version = latest.version`,
     [projectId]
   );
   const videos = videosData.map((row) => {
@@ -108,7 +113,12 @@ async function GetProjects(req: Request, res: Response) {
     });
 
     const [videosData] = await pool.query<RowDataPacket[]>(
-      "select * from video where projectId = ?",
+      `
+      select * from video
+      inner join (select id, MAX(version) as version from video
+      where projectId = ?
+      group by id) as latest
+      on video.id = latest.id and video.version = latest.version`,
       [projectId]
     );
     const videos = videosData.map((row) => {

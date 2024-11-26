@@ -10,6 +10,82 @@ type AddCommentBody = {
   end: string;
 };
 
+async function GetComment(req: Request, res: Response) {
+  const videoId = req.params.videoId;
+  const commentId = req.params.commentId;
+
+  const [commentData] = await pool.query<RowDataPacket[]>(
+    `select comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt from comment
+    inner join user on comment.userId = user.id
+    where videoId = ? and comment.id = ?`,
+    [videoId, commentId]
+  );
+
+  if (commentData.length === 0 || commentData[0] === undefined) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+
+  const comment = commentData[0];
+
+  const [likedByData] = await pool.query<RowDataPacket[]>(
+    `select user.id as id, name, profilePicture from comment_likes
+    inner join user on comment_likes.userId = user.id
+    where commentId = ?`,
+    [commentId]
+  );
+
+  const likedBy = likedByData.map((row) => {
+    return {
+      id: row.id,
+      name: row.name,
+      profileUrl: row.profilePicture,
+    };
+  });
+
+  const [repliesData] = await pool.query<RowDataPacket[]>(
+    `select reply.id as id, commentId, userId, name, profilePicture, content, modifiedAt, likes from reply
+    inner join user on reply.userId = user.id
+    where commentId = ?`,
+    [commentId]
+  );
+
+  let replies = [];
+  for (let reply of repliesData) {
+    replies.push({
+      id: reply.id,
+      commentId: reply.commentId,
+      user: {
+        id: reply.userId,
+        name: reply.name,
+        profileUrl: reply.profilePicture,
+      },
+      content: reply.content,
+      likes: reply.likes,
+      modifiedAt: reply.modifiedAt,
+    });
+  }
+
+  const commentResponse = {
+    id: comment.id,
+    videoId: comment.videoId,
+    version: comment.version,
+    start: comment.start,
+    end: comment.end,
+    user: {
+      id: comment.userId,
+      name: comment.name,
+      profileUrl: comment.profilePicture,
+    },
+    content: comment.content,
+    likes: comment.likes,
+    likedBy: likedBy,
+    replies: replies,
+    modifiedAt: comment.modifiedAt,
+  };
+
+  res.json({ comment: commentResponse });
+}
+
 async function GetComments(req: Request, res: Response) {
   const videoId = req.params.videoId;
   let versionString = req.query.version;
@@ -399,6 +475,7 @@ async function UnlikeComment(req: Request, res: Response) {
 }
 
 export {
+  GetComment,
   GetComments,
   AddComment,
   UpdateComment,

@@ -2,13 +2,7 @@ import { Request, Response } from "express";
 import { sampleComment } from "../interfaces/Comment";
 import { pool } from "../database/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
-
-// AddComments request body
-type AddCommentBody = {
-  content: string;
-  start: string;
-  end: string;
-};
+import { AddTags, DeleteTags } from "../services/tags";
 
 async function GetComment(req: Request, res: Response) {
   const videoId = req.params.videoId;
@@ -182,7 +176,7 @@ async function AddComment(req: Request, res: Response) {
   let versionString = req.query.version;
   const userId = req.user!.id;
 
-  const { content, start, end } = req.body as AddCommentBody;
+  const { content, start, end, tags } = req.body;
 
   if (!versionString) {
     const [versionData] = await pool.query<RowDataPacket[]>(
@@ -238,13 +232,22 @@ async function AddComment(req: Request, res: Response) {
     likedBy: [],
     modifiedAt: comment.modifiedAt,
   };
+
+  if (tags) {
+    try {
+      await AddTags(tags, comment.videoId, version);
+    } catch (err) {
+      return res.status(500).json({ message: "Failed to add tags" });
+    }
+  }
+
   res.json({ message: "Comment added successfully", comment: commentResponse });
 }
 
 async function UpdateComment(req: Request, res: Response) {
   const videoId = req.params.videoId;
   const commentId = req.params.commentId;
-  const { content, start, end } = req.body;
+  const { content, start, end, oldtags, newtags } = req.body;
 
   const [commentData] = await pool.query<RowDataPacket[]>(
     "select * from comment where id = ?",
@@ -328,6 +331,23 @@ async function UpdateComment(req: Request, res: Response) {
     likedBy: likedBy,
     modifiedAt: comment.modifiedAt,
   };
+
+  if (oldtags) {
+    try {
+      await DeleteTags(oldtags, comment.videoId, comment.version);
+    } catch (err) {
+      return res.status(500).json({ message: err });
+    }
+  }
+
+  if (newtags) {
+    try {
+      await AddTags(newtags, comment.videoId, comment.version);
+    } catch (err) {
+      return res.status(500).json({ message: "Failed to add tags" });
+    }
+  }
+
   res.json({
     message: "Comment updated successfully",
     comment: commentResponse,
@@ -338,6 +358,7 @@ async function DeleteComment(req: Request, res: Response) {
   const commentId = req.params.commentId;
   const videoId = req.params.videoId;
   const userId = req.user!.id;
+  const tags = req.body.tags;
 
   // get comment
   const [commentData] = await pool.query<RowDataPacket[]>(
@@ -382,6 +403,14 @@ async function DeleteComment(req: Request, res: Response) {
   const affectedRows = resultData.affectedRows;
   if (affectedRows === 0) {
     return res.status(500).json({ message: "Failed to delete comment" });
+  }
+
+  if (tags) {
+    try {
+      await DeleteTags(tags, comment.videoId, comment.version);
+    } catch (err) {
+      return res.status(500).json({ message: err });
+    }
   }
 
   res.json({ message: "Comment deleted successfully" });

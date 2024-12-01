@@ -349,6 +349,40 @@ async function GetProjectCode(req: Request, res: Response) {
   res.status(200).json({ project: projectId, projectCode: projectCode });
 }
 
+async function GetTagRelatedVideos(req: Request, res: Response) {
+  const projectId = req.params.projectId;
+  const tag = req.params.tagName;
+
+  if (!projectId) {
+    return res.status(400).json({ message: "Project ID is required" });
+  }
+  if (!tag) {
+    return res.status(400).json({ message: "Tag is required" });
+  }
+
+  const [videoData] = await pool.query<RowDataPacket[]>(
+    `
+    select video.id as id, title, video.version as version from video
+    inner join tag on video.id = tag.videoId and video.version = tag.version
+    where tag.projectId = ? and name = ?`,
+    [projectId, tag]
+  );
+
+  const videos = videoData.map((row) => {
+    return {
+      id: row.id,
+      title: row.title,
+      version: row.version,
+    };
+  });
+
+  res.status(200).json({
+    tag,
+    project: projectId,
+    related: videos,
+  });
+}
+
 export {
   GetProject,
   GetProjects,
@@ -357,4 +391,5 @@ export {
   JoinProject,
   GetProjectCode,
   DeleteProject,
+  GetTagRelatedVideos,
 };

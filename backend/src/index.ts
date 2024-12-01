@@ -136,6 +136,12 @@ app.post(
 );
 app.delete("/api/projects/:projectId", jwtMiddleware, projects.DeleteProject);
 
+app.get(
+  "/api/projects/:projectId/tags/:tagName",
+  jwtMiddleware,
+  projects.GetTagRelatedVideos
+);
+
 // Start the server
 app.listen(config.port, () => {
   console.log(`Origin server running on port ${config.port}`);

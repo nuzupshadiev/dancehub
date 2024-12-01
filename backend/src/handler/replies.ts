@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { pool } from "../database/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
+import { AddTags, DeleteTags } from "../services/tags";
 
 async function AddReply(req: Request, res: Response) {
   const { videoId, commentId } = req.params;
-  const { content } = req.body;
+  const { content, tags } = req.body;
   const userId = req.user!.id;
 
   const [commentData] = await pool.query<RowDataPacket[]>(
@@ -16,9 +17,10 @@ async function AddReply(req: Request, res: Response) {
     return res.status(404).json({ message: "Comment not found" });
   }
 
+  const version = commentData[0].version;
   const [resultData] = await pool.query<ResultSetHeader>(
     "insert into reply (commentId, userId, content, likes, modifiedAt) values (?, ?, ?, ?, ?)",
-    [commentId, userId, content, 0, new Date()]
+    [commentId, userId, content, 0, version]
   );
 
   const [replyData] = await pool.query<RowDataPacket[]>(
@@ -44,6 +46,14 @@ async function AddReply(req: Request, res: Response) {
     modifiedAt: replyData[0].modifiedAt,
   };
 
+  if (tags) {
+    try {
+      await AddTags(tags, parseInt(videoId), version);
+    } catch (err) {
+      return res.status(500).json({ message: err });
+    }
+  }
+
   res.json({
     message: "Reply added successfully",
     reply: replyResponse,
@@ -52,8 +62,17 @@ async function AddReply(req: Request, res: Response) {
 
 async function UpdateReply(req: Request, res: Response) {
   const { videoId, commentId, replyId } = req.params;
-  const { content } = req.body;
+  const { content, oldtags, newtags } = req.body;
   const userId = req.user!.id;
+
+  const [commentData] = await pool.query<RowDataPacket[]>(
+    "select * from comment where id = ? and videoId = ?",
+    [commentId, videoId]
+  );
+  if (commentData.length === 0 || commentData[0] === undefined) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+  const version = commentData[0].version;
 
   const [replyData] = await pool.query<RowDataPacket[]>(
     "select * from reply where id = ? and commentId = ?",
@@ -82,6 +101,22 @@ async function UpdateReply(req: Request, res: Response) {
     [replyId]
   );
 
+  if (oldtags) {
+    try {
+      await DeleteTags(oldtags, parseInt(videoId), version);
+    } catch (err) {
+      return res.status(500).json({ message: err });
+    }
+  }
+
+  if (newtags) {
+    try {
+      await AddTags(newtags, parseInt(videoId), version);
+    } catch (err) {
+      return res.status(500).json({ message: err });
+    }
+  }
+
   res.json({
     message: "Reply updated successfully",
     reply: updatedReplyData[0],
@@ -91,6 +126,16 @@ async function UpdateReply(req: Request, res: Response) {
 async function DeleteReply(req: Request, res: Response) {
   const { videoId, commentId, replyId } = req.params;
   const userId = req.user!.id;
+  const tags = req.body.tags;
+
+  const [commentData] = await pool.query<RowDataPacket[]>(
+    "select * from comment where id = ? and videoId = ?",
+    [commentId, videoId]
+  );
+  if (commentData.length === 0 || commentData[0] === undefined) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+  const version = commentData[0].version;
 
   const [replyData] = await pool.query<RowDataPacket[]>(
     "select * from reply where id = ? and commentId = ?",
@@ -112,6 +157,14 @@ async function DeleteReply(req: Request, res: Response) {
 
   if (resultData.affectedRows === 0) {
     return res.status(500).json({ message: "Failed to delete reply" });
+  }
+
+  if (tags) {
+    try {
+      await DeleteTags(tags, parseInt(videoId), version);
+    } catch (err) {
+      return res.status(500).json({ message: err });
+    }
   }
 
   res.json({ message: "Reply deleted successfully" });

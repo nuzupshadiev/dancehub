@@ -68,6 +68,7 @@ app.post("/api/videos/:videoId/like", jwtMiddleware, videos.LikeVideo);
 app.post("/api/videos/:videoId/unlike", jwtMiddleware, videos.UnlikeVideo);
 
 // Comments API routes
+app.get("/api/videos/:videoId/comments/:commentId", comments.GetComment);
 app.get("/api/videos/:videoId/comments", comments.GetComments);
 app.post("/api/videos/:videoId/comments", jwtMiddleware, comments.AddComment);
 app.put(
@@ -119,6 +120,7 @@ app.post(
 );
 
 // Projects API routes
+app.get("/api/projects/:projectId", jwtMiddleware, projects.GetProject);
 app.get("/api/projects", jwtMiddleware, projects.GetProjects);
 app.post("/api/projects", jwtMiddleware, projects.AddProject);
 app.put("/api/projects/:projectId", jwtMiddleware, projects.UpdateProject);
@@ -133,6 +135,12 @@ app.post(
   projects.JoinProject
 );
 app.delete("/api/projects/:projectId", jwtMiddleware, projects.DeleteProject);
+
+app.get(
+  "/api/projects/:projectId/tags/:tagName",
+  jwtMiddleware,
+  projects.GetTagRelatedVideos
+);
 
 // Start the server
 app.listen(config.port, () => {

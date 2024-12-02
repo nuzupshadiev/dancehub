@@ -26,6 +26,7 @@ import * as VideoAPI from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
 import { UserT } from "@/src/API/user";
 import VideoInput from "@/components/videoInput";
+import Project from "@/src/API/project";
 function VideoPage({
   params,
 }: {
@@ -46,32 +47,14 @@ function VideoPage({
     new Set([])
   );
   const [selectedVersions, setSelectedVersions] = React.useState<Selection>(
-    new Set([])
+    new Set([video?.data.version as string])
   );
-  const [videoVersions, setVideoVersions] = React.useState<string[]>([
-    "123asd",
-    "123asda",
-    "123as2d",
-  ]);
-  const [usersInTheProject, setUsersInTheProject] = React.useState<UserT[]>([
-    {
-      id: "1",
-      name: "nuzup",
-      profileUrl:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqiGDWxu58BS_M9_hloRMYzZ_f7LMEs8a6qA&s",
-    },
-    {
-      id: "2",
-      name: "John Doe",
-      profileUrl: "https://randomuser.me/api/portraits",
-    },
-    {
-      id: "3",
-      name: "Jane Doe",
-      profileUrl: "https://randomuser.me/api/portraits",
-    },
-  ]);
+  const [usersInTheProject, setUsersInTheProject] = React.useState<UserT[]>([]);
   const playerRef = useRef(null);
+
+  const videoVersions = React.useMemo(() => {
+    return video?.data.versions.map((version) => version);
+  }, [video?.data.versions]);
 
   React.useEffect(() => {
     setVideoUrl(null);
@@ -90,6 +73,9 @@ function VideoPage({
           if (Number(likedBy.id) === user?.data.id) {
             setIsLiked(true);
           }
+        });
+        Project.getProject(user, video.data.project).then((project) => {
+          setUsersInTheProject(project.data.members);
         });
       })
       .catch((err) => {
@@ -224,6 +210,7 @@ function VideoPage({
           secondsElapsed={secondsElapsed}
           selectedUsers={selectedUsers}
           video={video}
+          usersInTheProject={usersInTheProject}
         />
       </div>
 

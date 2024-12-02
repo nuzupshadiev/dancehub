@@ -12,10 +12,13 @@ type ProjectResponseT = {
   message: string;
   project: ProjectT;
 };
+type ProjectCodeResponseT = {
+  message: string;
+};
 export type ProjectT = {
   id: string;
   title: string;
-  administrator: string;
+  administrator: UserT;
   members: UserT[];
   videos: VideoT[];
 };
@@ -111,12 +114,12 @@ export default class Project {
   static joinProject(
     joinCode: string,
     user: UserContextT["user"]
-  ): Promise<Project> {
+  ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
     }
 
-    return Endpoint.request<ProjectResponseT>("post", {
+    return Endpoint.request<ProjectCodeResponseT>("post", {
       url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/code/${joinCode}`,
       headers: {
         Authorization: `Bearer ${user.token}`,
@@ -124,7 +127,7 @@ export default class Project {
       params: {
         projectCode: joinCode,
       },
-    }).then((resp) => new Project(resp.data.project));
+    });
   }
 
   static getProjectVideos(
@@ -204,6 +207,22 @@ export default class Project {
         Authorization: `Bearer ${user.token}`,
       },
       data: payload,
+    }).then((resp) => new Project(resp.data.project));
+  }
+
+  static getProject(
+    user: UserContextT["user"],
+    projectId: string
+  ): Promise<Project> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<ProjectResponseT>("get", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/${projectId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
     }).then((resp) => new Project(resp.data.project));
   }
 }

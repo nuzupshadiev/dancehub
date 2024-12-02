@@ -15,12 +15,10 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Input,
 } from "@nextui-org/react";
 
-import Video, { CommentT } from "@/src/API/video";
+import Video, { CommentT, ReplyT } from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
-import MentionText from "./mentionText";
 import TimeInput from "@/components/timeinput";
 import CommentInput from "@/components/commentInput";
 import HighlightText from "@/components/highlightedText";
@@ -44,24 +42,9 @@ export default function Comment({
 
   const [isReplying, setIsReplying] = React.useState(false);
   const [replyText, setReplyText] = React.useState("");
-  const [replyComments, setReplyComments] = React.useState<Array<CommentT>>([
-    {
-      id: "1",
-      content: "This is a reply",
-      start: "0:00",
-      end: "0:10",
-      likes: 0,
-      likedBy: [],
-      user: {
-        id: "1",
-        name: "nuzup",
-        profileUrl: "https://i.pravatar.cc/150?img=1",
-      },
-      videoId: "1",
-      version: "1",
-      modifiedAt: new Date().toISOString(),
-    },
-  ]);
+  const [replyComments, setReplyComments] = React.useState<Array<ReplyT>>(
+    comment.replies
+  );
   const [isReplyCommentShown, setIsReplyCommentShown] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   const [value, setValue] = React.useState(comment.content);
@@ -149,6 +132,8 @@ export default function Comment({
     Video.replyToComment(user, comment.id, video.data.id, replyText)
       .then((reply) => {
         setReplyComments((prev) => [...prev, reply]);
+        setReplyText("");
+        setIsReplying(false);
       })
       .catch((err) => {
         console.log(err);
@@ -160,6 +145,10 @@ export default function Comment({
       setReplyComments((prev) => prev.filter((reply) => reply.id !== id));
     });
   }, []);
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="py-3 shadow-none flex flex-row gap-4 items-start w-full">
@@ -321,7 +310,7 @@ export default function Comment({
                 />
               }
             >
-              1 reply
+              {replyComments.length} Replies
             </Button>
           )}
           {isReplyCommentShown &&
@@ -338,23 +327,28 @@ export default function Comment({
         </div>
       </div>
       {/* If comment is mine */}
-      <div>
-        <Dropdown>
-          <DropdownTrigger>
-            <Button isIconOnly radius="full" variant="light">
-              <FontAwesomeIcon icon={faEllipsisVertical} />
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Static Actions">
-            <DropdownItem key="new" onPress={() => setIsEditing(true)}>
-              Edit
-            </DropdownItem>
-            <DropdownItem key="copy" onPress={() => deleteComment(comment.id)}>
-              Delete
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      </div>
+      {user.data.id.toString() === comment.user.id.toString() && (
+        <div>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button isIconOnly radius="full" variant="light">
+                <FontAwesomeIcon icon={faEllipsisVertical} />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Static Actions">
+              <DropdownItem key="new" onPress={() => setIsEditing(true)}>
+                Edit
+              </DropdownItem>
+              <DropdownItem
+                key="copy"
+                onPress={() => deleteComment(comment.id)}
+              >
+                Delete
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      )}
     </div>
   );
 }

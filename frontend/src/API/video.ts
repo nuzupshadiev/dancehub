@@ -14,9 +14,21 @@ export type CommentT = {
   content: string;
   likes: number;
   likedBy: UserT[];
+  replies: ReplyT[];
   modifiedAt: string;
 };
-
+export type ReplyT = {
+  id: string;
+  commentId: string;
+  user: {
+    id: string;
+    name: string;
+    profileUrl: string;
+  };
+  content: string;
+  likes: number;
+  modifiedAt: string;
+};
 export type VideoT = {
   project: string;
   id: string;
@@ -56,7 +68,7 @@ type VideoResponseT = {
 
 type ReplyResponseT = {
   message: string;
-  reply: CommentT;
+  reply: ReplyT;
 };
 
 export default class Video {
@@ -265,7 +277,7 @@ export default class Video {
     commentId: string,
     videoId: string,
     replyText: string
-  ): Promise<CommentT> {
+  ): Promise<ReplyT> {
     if (!user) {
       return Promise.reject("No user provided");
     }
@@ -384,7 +396,7 @@ export default class Video {
     videoId: string,
     replyId: string,
     content: string
-  ): Promise<CommentT> {
+  ): Promise<ReplyT> {
     if (!user) {
       return Promise.reject("No user provided");
     }

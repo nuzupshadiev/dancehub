@@ -105,7 +105,7 @@ function Page() {
   const handleJoinProject = React.useCallback(() => {
     Project.joinProject(joinCode, user)
       .then((project) => {
-        setProjects((prev) => [...prev, project]);
+        window.location.reload();
         onJoinClose();
       })
       .catch((err) => {
@@ -243,13 +243,13 @@ function Page() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <CommentInput
+      {/* <CommentInput
         mentionSuggestions={mentionSuggestions}
         tagSuggestions={tagSuggestions}
         value={commentValue}
         onChangeValue={setCommentValue}
         // onChange={setCommentValue}
-      />
+      /> */}
     </div>
   );
 }

@@ -9,12 +9,14 @@ import Video, { CommentT } from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
 import { Selection } from "@nextui-org/react";
 import CommentInput from "@/components/commentInput";
+import { UserT } from "@/src/API/user";
 interface CommentsSectionProps {
   video: Video;
   goToTime: (time: string) => void;
   secondsElapsed: number;
   projectId: string;
   selectedUsers: Selection;
+  usersInTheProject: UserT[];
 }
 export default function CommentsSection({
   video,
@@ -22,6 +24,7 @@ export default function CommentsSection({
   secondsElapsed,
   projectId,
   selectedUsers,
+  usersInTheProject,
 }: CommentsSectionProps) {
   const [commentsList, setCommentsList] = useState<Array<CommentT>>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -109,6 +112,7 @@ export default function CommentsSection({
             value={commentText}
             onChangeValue={setCommentText}
             onFocus={() => setIsTyping(true)}
+            mentionSuggestions={usersInTheProject}
           />
           {/* <Input
             fullWidth

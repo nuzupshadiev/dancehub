@@ -1,35 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { Input, Dropdown, DropdownMenu } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 
-export interface Suggestion {
+export type UserT = {
   id: string;
-  label: string;
-}
+  name: string;
+  profileUrl: string;
+};
 
 type CommentInputProps = {
   value: string;
   onChangeValue: (value: string) => void;
-  mentionSuggestions?: Suggestion[];
-  tagSuggestions?: Suggestion[];
+  mentionSuggestions?: UserT[];
 } & React.ComponentProps<typeof Input>;
 
 const CommentInput: React.FC<CommentInputProps> = ({
   mentionSuggestions = [],
-  tagSuggestions = [],
   value,
   onChangeValue,
   ...props
 }) => {
   const [inputValue, setInputValue] = useState(value);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<Suggestion[]>(
-    []
-  );
+  const [filteredSuggestions, setFilteredSuggestions] = useState<UserT[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   useEffect(() => {
     setInputValue(value);
   }, [value]);
-  
+
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -37,7 +34,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
     setInputValue(value);
     onChangeValue(value);
 
-    // Detect `@` or `#` trigger
+    // Detect `@` trigger
     const lastWord = value.split(" ").pop() || "";
 
     if (lastWord.startsWith("@")) {
@@ -45,15 +42,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
 
       setFilteredSuggestions(
         mentionSuggestions.filter((mention) =>
-          mention.label.toLowerCase().includes(query)
+          mention.name.toLowerCase().includes(query)
         )
-      );
-      setDropdownVisible(true);
-    } else if (lastWord.startsWith("#")) {
-      const query = lastWord.slice(1).toLowerCase();
-
-      setFilteredSuggestions(
-        tagSuggestions.filter((tag) => tag.label.toLowerCase().includes(query))
       );
       setDropdownVisible(true);
     } else {
@@ -62,11 +52,11 @@ const CommentInput: React.FC<CommentInputProps> = ({
   };
 
   // Handle suggestion selection
-  const handleSelectSuggestion = (suggestion: Suggestion) => {
+  const handleSelectSuggestion = (suggestion: UserT) => {
     const words = inputValue.split(" ");
 
     words.pop(); // Remove the last word (trigger)
-    const newValue = [...words, suggestion.label].join(" ") + " ";
+    const newValue = [...words, suggestion.name].join(" ") + " ";
 
     setInputValue(newValue);
     setDropdownVisible(false);
@@ -88,7 +78,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
           size={filteredSuggestions.length}
           onChange={(e) => {
             const selectedSuggestion = filteredSuggestions.find(
-              (suggestion) => suggestion.label === e.target.value
+              (suggestion) => suggestion.name === e.target.value
             );
 
             if (selectedSuggestion) {
@@ -97,8 +87,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
           }}
         >
           {filteredSuggestions.map((suggestion) => (
-            <option key={suggestion.id} value={suggestion.label}>
-              {suggestion.label}
+            <option key={suggestion.id} value={suggestion.name}>
+              {suggestion.name}
             </option>
           ))}
         </select>

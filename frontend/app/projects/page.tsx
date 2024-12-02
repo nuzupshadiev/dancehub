@@ -42,22 +42,6 @@ function Page() {
   const [joinCode, setJoinCode] = React.useState("");
   const { user } = React.useContext(UserContext);
 
-  // Delete later
-  const [commentValue, setCommentValue] = React.useState("");
-  const mentionSuggestions: Suggestion[] = [
-    { id: "1", label: "@john_doe" },
-    { id: "2", label: "@jane_doe" },
-    { id: "3", label: "@developer" },
-  ];
-
-  const tagSuggestions: Suggestion[] = [
-    { id: "4", label: "#react" },
-    { id: "5", label: "#javascript" },
-    { id: "6", label: "#nextjs" },
-  ];
-
-  //
-
   useEffect(() => {
     // fetch projects from server
     Project.getProjects(user)

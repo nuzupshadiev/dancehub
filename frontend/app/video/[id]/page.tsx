@@ -53,7 +53,7 @@ function VideoPage({
   const playerRef = useRef(null);
 
   const videoVersions = React.useMemo(() => {
-    return video?.data.versions.map((version) => version);
+    return video?.data.versions.map((version) => version) || [];
   }, [video?.data.versions]);
 
   React.useEffect(() => {

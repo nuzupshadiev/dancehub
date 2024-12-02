@@ -21,7 +21,6 @@ import ProjectItem from "./project-item";
 import Project, { ProjectT } from "@/src/API/project";
 import { UserContext } from "@/utils/user-context";
 import { useRouter } from "next/navigation";
-import CommentInput, { Suggestion } from "@/components/commentInput";
 function Page() {
   const {
     isOpen: isJoinOpen,
@@ -243,13 +242,6 @@ function Page() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      {/* <CommentInput
-        mentionSuggestions={mentionSuggestions}
-        tagSuggestions={tagSuggestions}
-        value={commentValue}
-        onChangeValue={setCommentValue}
-        // onChange={setCommentValue}
-      /> */}
     </div>
   );
 }

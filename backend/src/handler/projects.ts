@@ -362,8 +362,8 @@ async function GetTagRelatedVideos(req: Request, res: Response) {
 
   const [videoData] = await pool.query<RowDataPacket[]>(
     `
-    select video.id as id, title, video.version as version from video
-    inner join tag on video.id = tag.videoId and video.version = tag.version
+    select distinct video.id as id, title from video
+    inner join tag on video.id = tag.videoId
     where tag.projectId = ? and name = ?`,
     [projectId, tag]
   );

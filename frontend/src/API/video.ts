@@ -76,6 +76,23 @@ export default class Video {
   constructor(data: VideoT) {
     this.data = data;
   }
+  update(user: UserContextT["user"], payload: FormData): Promise<Video> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<VideoResponseT>("put", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${this.data.id}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      data: payload,
+      params: {
+        videoId: this.data.id,
+        userId: user.data.id,
+      },
+    }).then((resp) => new Video(resp.data.video));
+  }
   delete(user: UserContextT["user"]): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -124,6 +141,27 @@ export default class Video {
     }).then((resp) => new Video(resp.data));
   }
 
+  static getVideoVersion(
+    id: string,
+    version: string,
+    user: UserContextT["user"]
+  ): Promise<Video> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<VideoT>("get", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${id}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        videoId: id,
+        version: version,
+      },
+    }).then((resp) => new Video(resp.data));
+  }
+
   static createVideo(
     payload: FormData,
     user: UserContextT["user"]
@@ -147,6 +185,7 @@ export default class Video {
       content: string;
       start: string;
       end: string;
+      tags: string[];
     },
     videoId: string,
     user: UserContextT["user"]
@@ -276,7 +315,8 @@ export default class Video {
     user: UserContextT["user"],
     commentId: string,
     videoId: string,
-    replyText: string
+    replyText: string,
+    tags: string[]
   ): Promise<ReplyT> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -292,6 +332,7 @@ export default class Video {
       },
       data: {
         content: replyText,
+        tags: tags
       },
     }).then((resp) => resp.data.reply);
   }
@@ -323,6 +364,8 @@ export default class Video {
       content: string;
       start: string;
       end: string;
+      oldtags: string[];
+      newtags: string[];
     }
   ): Promise<CommentT> {
     if (!user) {
@@ -395,7 +438,8 @@ export default class Video {
     commentId: string,
     videoId: string,
     replyId: string,
-    content: string
+    content: string,
+    tags: string[]
   ): Promise<ReplyT> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -412,6 +456,7 @@ export default class Video {
       },
       data: {
         content: content,
+        tags: tags,
       },
     }).then((resp) => resp.data.reply);
   }

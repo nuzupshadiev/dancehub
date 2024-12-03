@@ -22,7 +22,7 @@ import { OnProgressProps } from "react-player/base";
 import CommentsSection from "./comments";
 import DescriptionSection from "./description";
 
-import * as VideoAPI from "@/src/API/video";
+import Video, * as VideoAPI from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
 import { UserT } from "@/src/API/user";
 import VideoInput from "@/components/videoInput";
@@ -42,7 +42,9 @@ function VideoPage({
   const [likes, setLikes] = React.useState(0);
   const [secondsElapsed, setSecondsElapsed] = React.useState(0);
   const [projectId, setProjectId] = React.useState("");
+
   const [videoUrl, setVideoUrl] = React.useState<File | null>(null);
+
   const [selectedUsers, setSelectedUsers] = React.useState<Selection>(
     new Set([])
   );
@@ -51,7 +53,7 @@ function VideoPage({
   );
   const [usersInTheProject, setUsersInTheProject] = React.useState<UserT[]>([]);
   const playerRef = useRef(null);
-
+  const [warningMessage, setWarningMessage] = React.useState("");
   const videoVersions = React.useMemo(() => {
     return video?.data.versions.map((version) => version) || [];
   }, [video?.data.versions]);
@@ -59,6 +61,10 @@ function VideoPage({
   React.useEffect(() => {
     setVideoUrl(null);
   }, [onOpenChange]);
+
+  React.useEffect(() => {
+    setSelectedVersions(new Set([video?.data.version as string]));
+  }, [video]);
 
   React.useEffect(() => {
     if (!user) {
@@ -116,22 +122,58 @@ function VideoPage({
     }
   }, []);
 
-  const handleSelectVersion = React.useCallback((selected: Selection) => {
-    setSelectedVersions(selected);
-    if (selected === "all" || selected.size === 0) return;
-    // VideoAPI.default
-    //   .getVideoVersion(params.id, user, selected.values().next().value)
-    //   .then((video) => {
-    //     setVideo(video);
-    //   });
-  }, []);
+  const handleSelectVersion = React.useCallback(
+    (selected: Selection) => {
+      setSelectedVersions(selected);
+      if (selected === "all" || selected.size === 0) return;
+      const stringVersion = selected.values().next().value as string;
+
+      Video.getVideoVersion(params.id, stringVersion, user)
+        .then((video) => {
+          setVideo(video);
+          setLikes(video.data.likedBy.length);
+          setIsLiked(
+            video.data.likedBy.some(
+              (likedBy) => likedBy.id === user?.data.id.toString()
+            )
+          );
+          video.data.likedBy.forEach((likedBy) => {
+            if (Number(likedBy.id) === user?.data.id) {
+              setIsLiked(true);
+            }
+          });
+        })
+        .catch(() => {
+          setWarningMessage("An error occurred while fetching the video");
+        });
+    },
+    [params.id, user]
+  );
   const handleOnProgress = React.useCallback((state: OnProgressProps) => {
     setSecondsElapsed(state.playedSeconds);
   }, []);
 
   const onVideoUploadHandler = React.useCallback(() => {
     // create new video
-  }, []);
+    if (!videoUrl) {
+      setWarningMessage("Please select a video file");
+
+      return;
+    }
+    const formData = new FormData();
+
+    formData.append("videoFile", videoUrl as File);
+    video
+      ?.update(user, formData)
+      .then((video) => {
+        setVideo(video);
+        onOpenChange();
+        setWarningMessage("");
+      })
+      .catch(() => {
+        setWarningMessage("An error occurred while uploading the video");
+      });
+  }, [videoUrl, video, user, onOpenChange]);
 
   if (!user) {
     return <p>You need to be logged in to view this page</p>;
@@ -166,11 +208,14 @@ function VideoPage({
               variant="bordered"
               onSelectionChange={handleSelectVersion}
             >
-              {videoVersions.map((version) => (
-                <SelectItem key={version} value={version}>
-                  {version}
-                </SelectItem>
-              ))}
+              {videoVersions.map((version) => {
+                const date = new Date(version);
+                return (
+                  <SelectItem key={version} value={version}>
+                    {date.toLocaleString()}
+                  </SelectItem>
+                );
+              })}
             </Select>
             <Select
               className="w-40"
@@ -224,6 +269,9 @@ function VideoPage({
                   setVideoSource={setVideoUrl}
                   videoSource={videoUrl}
                 />
+                {warningMessage && (
+                  <p className="text-red-500 text-sm">{warningMessage}</p>
+                )}
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onOpenChange}>

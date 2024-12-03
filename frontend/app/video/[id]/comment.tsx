@@ -56,6 +56,8 @@ export default function Comment({
   );
   const [endMinutes, setEndMinutes] = React.useState(comment.end.split(":")[0]);
   const [endSeconds, setEndSeconds] = React.useState(comment.end.split(":")[1]);
+  const [hashtags, setHashtags] = React.useState<string[]>([]);
+  const [replyHashtags, setReplyHashtags] = React.useState<string[]>([]);
 
   useEffect(() => {
     comment.likedBy.forEach((likedBy) => {
@@ -105,6 +107,8 @@ export default function Comment({
       start: `${Number(startMinutes)}:${Number(startSeconds)}`,
       end: `${Number(endMinutes)}:${Number(endSeconds)}`,
       content: value,
+      oldtags: [],
+      newtags: hashtags,
     }).then((editedComment) => {
       setValue(editedComment.content);
       setStartMinutes(editedComment.start.split(":")[0]);
@@ -113,7 +117,15 @@ export default function Comment({
       setEndSeconds(editedComment.end.split(":")[1]);
     });
     setIsEditing(false);
-  }, [value, startMinutes, startSeconds, endMinutes, endSeconds, user]);
+  }, [
+    value,
+    startMinutes,
+    startSeconds,
+    endMinutes,
+    endSeconds,
+    user,
+    hashtags,
+  ]);
 
   const handleCancelEditComment = React.useCallback(() => {
     setValue(comment.content);
@@ -129,7 +141,13 @@ export default function Comment({
       return;
     }
 
-    Video.replyToComment(user, comment.id, video.data.id, replyText)
+    Video.replyToComment(
+      user,
+      comment.id,
+      video.data.id,
+      replyText,
+      replyHashtags
+    )
       .then((reply) => {
         setReplyComments((prev) => [...prev, reply]);
         setReplyText("");
@@ -138,7 +156,7 @@ export default function Comment({
       .catch((err) => {
         console.log(err);
       });
-  }, [replyText, user, comment, video]);
+  }, [replyText, user, comment, video, replyHashtags]);
 
   const deleteReply = React.useCallback((id: string) => {
     Video.deleteReply(user, comment.id, video.data.id, id).then(() => {
@@ -165,6 +183,7 @@ export default function Comment({
             <CommentInput
               value={value}
               onChangeValue={setValue}
+              setHashtagsParent={setHashtags}
               fullWidth
               placeholder="Add a public comment..."
               size="sm"
@@ -211,7 +230,7 @@ export default function Comment({
         ) : (
           <div>
             <div>
-              <HighlightText text={value} />
+              <HighlightText text={value} projectId={video.data.project} />
               {/* <MentionText text={value} /> */}
               {/* <MentionText text={value} /> */}
             </div>
@@ -274,6 +293,7 @@ export default function Comment({
               fullWidth
               value={replyText}
               onChangeValue={setReplyText}
+              setHashtagsParent={setReplyHashtags}
               placeholder="Add a reply..."
               size="sm"
               variant="underlined"
@@ -322,6 +342,7 @@ export default function Comment({
                 commentId={comment.id}
                 videoId={video.data.id}
                 deleteReply={deleteReply}
+                projectId={video.data.project}
               />
             ))}
         </div>

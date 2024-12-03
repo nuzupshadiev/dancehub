@@ -10,6 +10,7 @@ export type UserT = {
 type CommentInputProps = {
   value: string;
   onChangeValue: (value: string) => void;
+  setHashtagsParent: (hashtags: string[]) => void;
   mentionSuggestions?: UserT[];
 } & React.ComponentProps<typeof Input>;
 
@@ -17,22 +18,41 @@ const CommentInput: React.FC<CommentInputProps> = ({
   mentionSuggestions = [],
   value,
   onChangeValue,
+  setHashtagsParent,
   ...props
 }) => {
   const [inputValue, setInputValue] = useState(value);
   const [filteredSuggestions, setFilteredSuggestions] = useState<UserT[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [hashtags, setHashtags] = useState<string[]>([]);
 
   useEffect(() => {
     setInputValue(value);
+    extractHashtags(value);
   }, [value]);
+
+  // Extract hashtags from the input value
+  const extractHashtags = (text: string): string[] => {
+    const hashtagRegex = /#(\w+)/g;
+    const hashtags: string[] = [];
+    let match;
+
+    while ((match = hashtagRegex.exec(text)) !== null) {
+      hashtags.push(`#${match[1]}`);
+    }
+
+    return hashtags;
+  };
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     setInputValue(value);
+    const extractedHashtags = extractHashtags(value);
+
     onChangeValue(value);
+    setHashtagsParent(extractedHashtags);
 
     // Detect `@` trigger
     const lastWord = value.split(" ").pop() || "";

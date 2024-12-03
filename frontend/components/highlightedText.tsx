@@ -1,6 +1,10 @@
 "use client";
+import Project from "@/src/API/project";
+import { UserContext } from "@/utils/user-context";
 import { Button } from "@nextui-org/button";
 import {
+  Card,
+  CardBody,
   Modal,
   ModalBody,
   ModalContent,
@@ -8,15 +12,24 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
+import { on } from "events";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 interface HighlightTextProps {
   text: string;
+  projectId: string;
 }
 
-const HighlightText: React.FC<HighlightTextProps> = ({ text }) => {
+const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [currentMatch, setCurrentMatch] = React.useState("");
+  const { user } = React.useContext(UserContext);
+  const [listOfVideos, setListOfVideos] = React.useState<
+    { desription: string; id: string; title: string }[]
+  >([]);
+  const [projectTitle, setProjectTitle] = React.useState("");
+  const router = useRouter();
 
   const handleOnPress = React.useCallback((text: string) => {
     if (text.startsWith("@")) {
@@ -26,6 +39,14 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text }) => {
       onOpen();
     }
   }, []);
+
+  React.useEffect(() => {
+    if (!user) return;
+    Project.getTagRelatedVideos(user, projectId, currentMatch).then((resp) => {
+      setListOfVideos(resp.videos);
+      setProjectTitle(resp.title);
+    });
+  }, [currentMatch, user, projectId]);
   // Regular expressions to match mentions and tags
   const mentionRegex = /@\w+/g;
   const tagRegex = /#\w+/g;
@@ -85,6 +106,14 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text }) => {
     return parts;
   };
 
+  const handleGotoProject = React.useCallback(
+    (video: { desription: string; id: string; title: string }) => {
+      router.push(`/video/${video.id}`);
+      onOpenChange();
+    },
+    [router, onOpenChange]
+  );
+
   return (
     <div>
       {processText(text)}
@@ -93,27 +122,34 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text }) => {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                All videos for {currentMatch}
+                All videos for {currentMatch} in project {projectTitle}
               </ModalHeader>
               <ModalBody>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Nullam pulvinar risus non risus hendrerit venenatis.
-                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                </p>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Nullam pulvinar risus non risus hendrerit venenatis.
-                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                </p>
-                <p>
-                  Magna exercitation reprehenderit magna aute tempor cupidatat
-                  consequat elit dolor adipisicing. Mollit dolor eiusmod sunt ex
-                  incididunt cillum quis. Velit duis sit officia eiusmod Lorem
-                  aliqua enim laboris do dolor eiusmod. Et mollit incididunt
-                  nisi consectetur esse laborum eiusmod pariatur proident Lorem
-                  eiusmod et. Culpa deserunt nostrud ad veniam.
-                </p>
+                {listOfVideos.map((video) => (
+                  <Card
+                    key={video.id}
+                    disableRipple
+                    isPressable
+                    as={"div"}
+                    className={
+                      "flex flex-col gap-y-2 border-2 border-transparent hover:border-primary-600 bg-primary-50 dark:bg-darkBg-900 p-4"
+                    }
+                    onPress={() => handleGotoProject(video)}
+                  >
+                    <CardBody className=" flex flex-row gap-4 !p-0 ml-1 h-20">
+                      {/* <img
+                      alt="thumbnail"
+                      className="object-fit rounded-lg"
+                      src={thumbnailUrl}
+                    /> */}
+                      <div>
+                        <h1 className="font-bold text-xl text-foreground">
+                          {video.title}
+                        </h1>
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>

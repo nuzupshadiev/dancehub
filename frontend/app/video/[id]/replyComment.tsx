@@ -24,6 +24,7 @@ type ReplyCommentProps = {
   commentId: string;
   videoId: string;
   deleteReply: (id: string) => void;
+  projectId: string;
 };
 export default function ReplyComment({
   comment,
@@ -31,11 +32,13 @@ export default function ReplyComment({
   commentId,
   videoId,
   deleteReply,
+  projectId,
 }: ReplyCommentProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(comment.content);
   const [likes, setLikes] = useState(comment.likes);
   const [isLiked, setIsLiked] = useState(false);
+  const [hashtags, setHashtags] = useState<string[]>([]);
   const { user } = React.useContext(UserContext);
   const handleCancelEditComment = React.useCallback(() => {
     setIsEditing(false);
@@ -46,13 +49,18 @@ export default function ReplyComment({
     if (value === "" || !user) {
       return;
     }
-    Video.updateReply(user, commentId, videoId, comment.id, value).then(
-      (reply) => {
-        setIsEditing(false);
-        setValue(reply.content);
-      }
-    );
-  }, [value, user, commentId, videoId, comment.id]);
+    Video.updateReply(
+      user,
+      commentId,
+      videoId,
+      comment.id,
+      value,
+      hashtags
+    ).then((reply) => {
+      setIsEditing(false);
+      setValue(reply.content);
+    });
+  }, [value, user, commentId, videoId, comment.id, hashtags]);
 
   const handleDeleteReply = React.useCallback(() => {
     deleteReply(comment.id);
@@ -91,6 +99,7 @@ export default function ReplyComment({
             <CommentInput
               value={value}
               onChangeValue={setValue}
+              setHashtagsParent={setHashtags}
               fullWidth
               placeholder="Add a public comment..."
               size="sm"
@@ -111,7 +120,7 @@ export default function ReplyComment({
             </div>
           </div>
         ) : (
-          <HighlightText text={value} />
+          <HighlightText text={value} projectId={projectId} />
         )}
 
         <div className="flex gap-2">

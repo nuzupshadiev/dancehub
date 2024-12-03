@@ -33,6 +33,7 @@ export default function CommentsSection({
   const [startSeconds, setStartSeconds] = useState("");
   const [endMinutes, setEndMinutes] = useState("");
   const [endSeconds, setEndSeconds] = useState("");
+  const [hashtags, setHashtags] = useState<string[]>([]);
   const { user } = React.useContext(UserContext);
   const handleCancel = React.useCallback(() => {
     setCommentText("");
@@ -61,6 +62,7 @@ export default function CommentsSection({
         start: `${Number(startMinutes)}:${Number(startSeconds)}`,
         end: `${Number(endMinutes)}:${Number(endSeconds)}`,
         content: commentText,
+        tags: hashtags,
       },
       video.data.id,
       user
@@ -69,7 +71,15 @@ export default function CommentsSection({
     });
     setCommentText("");
     setIsTyping(false);
-  }, [user, commentText, startMinutes, startSeconds, endMinutes, endSeconds]);
+  }, [
+    user,
+    commentText,
+    startMinutes,
+    startSeconds,
+    endMinutes,
+    endSeconds,
+    hashtags,
+  ]);
 
   const filteredTexts = commentsList.filter((text) => {
     if (selectedUsers === "all") return true;
@@ -110,6 +120,7 @@ export default function CommentsSection({
           <CommentInput
             fullWidth
             value={commentText}
+            setHashtagsParent={setHashtags}
             onChangeValue={setCommentText}
             onFocus={() => setIsTyping(true)}
             mentionSuggestions={usersInTheProject}

@@ -15,6 +15,13 @@ type ProjectResponseT = {
 type ProjectCodeResponseT = {
   message: string;
 };
+export type TagVideoT = {
+  id: string;
+  title: string;
+  version: string;
+};
+export type TagVideosT = TagVideoT[];
+
 export type ProjectT = {
   id: string;
   title: string;
@@ -224,5 +231,38 @@ export default class Project {
         Authorization: `Bearer ${user.token}`,
       },
     }).then((resp) => new Project(resp.data.project));
+  }
+
+  static getTagRelatedVideos(
+    user: UserContextT["user"],
+    projectId: string,
+    tagName: string
+  ): Promise<{
+    project: string;
+    title: string;
+    totalVideos: number;
+    videos: { desription: string; id: string; title: string }[];
+  }> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request<{
+      project: string;
+      title: string;
+      totalVideos: number;
+      videos: { desription: string; id: string; title: string }[];
+    }>("get", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/list/${projectId}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        userId: user.data.id,
+        tagName: tagName,
+      },
+    }).then((resp) => {
+      return resp.data;
+    });
   }
 }

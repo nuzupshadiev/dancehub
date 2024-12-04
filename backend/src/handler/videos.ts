@@ -312,7 +312,7 @@ async function GetVideoList(req: Request, res: Response) {
   const projectId = req.params.projectId;
 
   const videosData = await pool.query<RowDataPacket[]>(
-    "SELECT * FROM video WHERE projectId = ?",
+    "SELECT distinct id, title, description FROM video WHERE projectId = ?",
     [projectId]
   );
 

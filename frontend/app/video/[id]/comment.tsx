@@ -317,7 +317,7 @@ export default function Comment({
           </div>
         )}
         <div className="mt-2">
-          {replyComments.length > 0 && (
+          {replyComments && replyComments.length > 0 && (
             <Button
               size="sm"
               className="w-fit"

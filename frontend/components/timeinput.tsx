@@ -33,7 +33,7 @@ export default function TimeInput({
         maxLength={2}
         placeholder="mm"
         size="sm"
-        type="text"
+        type="number"
         value={minutes}
         variant="bordered"
         onChange={handleMinutesChange}
@@ -44,7 +44,7 @@ export default function TimeInput({
         maxLength={2}
         placeholder="ss"
         size="sm"
-        type="text"
+        type="number"
         value={seconds}
         variant="bordered"
         onChange={handleSecondsChange}

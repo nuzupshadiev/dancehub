@@ -48,6 +48,11 @@ function Login() {
           value={email}
           variant="underlined"
           onValueChange={setEmail}
+          onKeyDown={(e: KeyboardEvent) => {
+            if (e.key === "Enter") {
+              handleLogin();
+            }
+          }}
         />
         <Input
           label={"Password"}
@@ -55,6 +60,11 @@ function Login() {
           value={password}
           variant="underlined"
           onValueChange={setPassword}
+          onKeyDown={(e: KeyboardEvent) => {
+            if (e.key === "Enter") {
+              handleLogin();
+            }
+          }}
         />
         {errorMessage && (
           <p className="text-red-500 text-xs text-start w-full">

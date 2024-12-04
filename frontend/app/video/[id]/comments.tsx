@@ -41,10 +41,12 @@ export default function CommentsSection({
   }, []);
 
   useEffect(() => {
-    Video.getComments(video.data.id, user).then((comments) => {
-      setCommentsList(comments);
-    });
-  }, [video.data.id, user]);
+    Video.getComments(video.data.id, user, video.data.version).then(
+      (comments) => {
+        setCommentsList(comments);
+      }
+    );
+  }, [video, user]);
 
   const handleCommentSubmit = React.useCallback(() => {
     if (
@@ -65,7 +67,8 @@ export default function CommentsSection({
         tags: hashtags,
       },
       video.data.id,
-      user
+      user,
+      video.data.version
     ).then((comment) => {
       setCommentsList((prev) => [...prev, comment.comment]);
     });

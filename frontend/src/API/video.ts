@@ -188,7 +188,8 @@ export default class Video {
       tags: string[];
     },
     videoId: string,
-    user: UserContextT["user"]
+    user: UserContextT["user"],
+    version?: string
   ): Promise<CommentCreateT> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -206,6 +207,7 @@ export default class Video {
       },
       params: {
         videoId: videoId,
+        version: version,
       },
     }).then((resp) => {
       return resp.data;
@@ -214,7 +216,8 @@ export default class Video {
 
   static getComments(
     videoId: string,
-    user: UserContextT["user"]
+    user: UserContextT["user"],
+    version?: string
   ): Promise<CommentT[]> {
     if (!user) {
       return Promise.resolve([]);
@@ -227,6 +230,7 @@ export default class Video {
       },
       params: {
         videoId: videoId,
+        version: version,
       },
     }).then((resp) => resp.data.comments);
   }
@@ -275,7 +279,7 @@ export default class Video {
 
   static likeVideo(
     user: UserContextT["user"],
-    videoId: string
+    videoId: string,
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");

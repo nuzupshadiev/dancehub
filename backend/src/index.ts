@@ -139,7 +139,7 @@ app.delete("/api/projects/:projectId", jwtMiddleware, projects.DeleteProject);
 app.get(
   "/api/projects/:projectId/tags/:tagName",
   jwtMiddleware,
-  projects.GetTagRelatedVideos
+  projects.GetTagRelated
 );
 
 // Start the server

@@ -3,6 +3,10 @@ import { sampleComment } from "../interfaces/Comment";
 import { pool } from "../database/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { AddTags, DeleteTags } from "../services/tags";
+import {
+  AddCommentTags,
+  DeleteCommentTags,
+} from "../services/commentTagService";
 
 async function GetComment(req: Request, res: Response) {
   const videoId = req.params.videoId;
@@ -235,7 +239,7 @@ async function AddComment(req: Request, res: Response) {
 
   if (tags) {
     try {
-      await AddTags(tags, comment.videoId, version);
+      await AddCommentTags(tags, comment.videoId, comment.version, insertId);
     } catch (err) {
       return res.status(500).json({ message: "Failed to add tags" });
     }
@@ -334,7 +338,7 @@ async function UpdateComment(req: Request, res: Response) {
 
   if (oldtags) {
     try {
-      await DeleteTags(oldtags, comment.videoId, comment.version);
+      await DeleteCommentTags(comment.videoId, comment.version, comment.id);
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -342,7 +346,12 @@ async function UpdateComment(req: Request, res: Response) {
 
   if (newtags) {
     try {
-      await AddTags(newtags, comment.videoId, comment.version);
+      await AddCommentTags(
+        newtags,
+        comment.videoId,
+        comment.version,
+        comment.id
+      );
     } catch (err) {
       return res.status(500).json({ message: "Failed to add tags" });
     }
@@ -403,14 +412,6 @@ async function DeleteComment(req: Request, res: Response) {
   const affectedRows = resultData.affectedRows;
   if (affectedRows === 0) {
     return res.status(500).json({ message: "Failed to delete comment" });
-  }
-
-  if (tags) {
-    try {
-      await DeleteTags(tags, comment.videoId, comment.version);
-    } catch (err) {
-      return res.status(500).json({ message: err });
-    }
   }
 
   res.json({ message: "Comment deleted successfully" });

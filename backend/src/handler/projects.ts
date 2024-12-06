@@ -383,6 +383,85 @@ async function GetTagRelatedVideos(req: Request, res: Response) {
   });
 }
 
+async function GetTagRelated(req: Request, res: Response) {
+  const projectId = req.params.projectId;
+  const tag = req.params.tagName;
+
+  if (!projectId) {
+    return res.status(400).json({ message: "Project ID is required" });
+  }
+  if (!tag) {
+    return res.status(400).json({ message: "Tag is required" });
+  }
+
+  const [commentTagData] = await pool.query<RowDataPacket[]>(
+    `
+    select comment_tag.projectId as projectId, name, comment_tag.videoId as videoId, comment_tag.version as version, content, title from comment_tag
+    inner join comment on comment_tag.commentId = comment.id
+    inner join video on comment.videoId = video.id and comment_tag.version = video.version
+    where comment_tag.projectId = ? and name = ?
+    `,
+    [projectId, tag]
+  );
+
+  const comments = commentTagData.map((row) => {
+    return {
+      project: row.projectId,
+      title: row.title,
+      version: row.version,
+      content: row.content,
+    };
+  });
+
+  const [replyTagData] = await pool.query<RowDataPacket[]>(
+    `
+    select reply_tag.projectId as projectId, name, reply_tag.videoId as videoId, reply_tag.version as version, reply.content as content, title from reply_tag
+    inner join reply on reply_tag.replyId = reply.id
+    inner join comment on reply.commentId = comment.id
+    inner join video on comment.videoId = video.id and reply_tag.version = video.version
+    where reply_tag.projectId = ? and name = ?
+    `,
+    [projectId, tag]
+  );
+
+  const replies = replyTagData.map((row) => {
+    return {
+      project: row.projectId,
+      title: row.title,
+      version: row.version,
+      content: row.content,
+    };
+  });
+
+  const [relatedData] = await pool.query<RowDataPacket[]>(
+    `
+    select distinct video.id as id, title from video
+    inner join comment_tag on video.id = comment_tag.videoId
+    where comment_tag.projectId = ? and name = ?
+    union
+    select distinct video.id as id, title from video
+    inner join reply_tag on video.id = reply_tag.videoId
+    where reply_tag.projectId = ? and name = ?
+    `,
+    [projectId, tag, projectId, tag]
+  );
+
+  const related = relatedData.map((row) => {
+    return {
+      id: row.id,
+      title: row.title,
+    };
+  });
+
+  res.status(200).json({
+    tag,
+    project: projectId,
+    comments: comments,
+    replies: replies,
+    related: related,
+  });
+}
+
 export {
   GetProject,
   GetProjects,
@@ -391,5 +470,5 @@ export {
   JoinProject,
   GetProjectCode,
   DeleteProject,
-  GetTagRelatedVideos,
+  GetTagRelated,
 };

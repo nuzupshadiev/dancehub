@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { pool } from "../database/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { AddTags, DeleteTags } from "../services/tags";
+import { AddReplyTags, DeleteReplyTags } from "../services/replyTagService";
 
 async function AddReply(req: Request, res: Response) {
   const { videoId, commentId } = req.params;
@@ -48,7 +49,7 @@ async function AddReply(req: Request, res: Response) {
 
   if (tags) {
     try {
-      await AddTags(tags, parseInt(videoId), version);
+      await AddReplyTags(tags, parseInt(videoId), version, resultData.insertId);
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -103,7 +104,7 @@ async function UpdateReply(req: Request, res: Response) {
 
   if (oldtags) {
     try {
-      await DeleteTags(oldtags, parseInt(videoId), version);
+      await DeleteReplyTags(parseInt(videoId), version, parseInt(replyId));
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -111,7 +112,12 @@ async function UpdateReply(req: Request, res: Response) {
 
   if (newtags) {
     try {
-      await AddTags(newtags, parseInt(videoId), version);
+      await AddReplyTags(
+        newtags,
+        parseInt(videoId),
+        version,
+        parseInt(replyId)
+      );
     } catch (err) {
       return res.status(500).json({ message: err });
     }
@@ -157,14 +163,6 @@ async function DeleteReply(req: Request, res: Response) {
 
   if (resultData.affectedRows === 0) {
     return res.status(500).json({ message: "Failed to delete reply" });
-  }
-
-  if (tags) {
-    try {
-      await DeleteTags(tags, parseInt(videoId), version);
-    } catch (err) {
-      return res.status(500).json({ message: err });
-    }
   }
 
   res.json({ message: "Reply deleted successfully" });

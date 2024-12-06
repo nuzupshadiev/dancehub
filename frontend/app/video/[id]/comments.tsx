@@ -100,7 +100,8 @@ export default function CommentsSection({
         const seconds = Math.floor(secondsElapsed);
 
         return (
-          seconds >= startMin * 60 + startSec && seconds <= endMin * 60 + endSec
+          seconds >= startMin * 60 + startSec - 3 &&
+          seconds <= endMin * 60 + endSec + 3
         );
       })
     : filteredTexts;

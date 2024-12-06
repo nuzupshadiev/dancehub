@@ -198,9 +198,11 @@ function VideoPage({
         <div className="flex flex-row justify-between max-w-7xl">
           <h1 className="text-xl font-bold">{video.data.title}</h1>
           <div className="flex flex-row gap-2 items-center">
-            <Switch isSelected={relevantOnly} onValueChange={setRelevantOnly}>
-              Relevant Only
-            </Switch>
+            <div className="text-sm">Comments on Current Time</div>
+            <Switch
+              isSelected={relevantOnly}
+              onValueChange={setRelevantOnly}
+            ></Switch>
             <Button size="sm" onClick={onOpen}>
               Upload new version
             </Button>

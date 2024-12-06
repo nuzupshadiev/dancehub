@@ -15,6 +15,7 @@ import {
   Select,
   SelectItem,
   Selection,
+  Switch,
   useDisclosure,
 } from "@nextui-org/react";
 import { OnProgressProps } from "react-player/base";
@@ -42,7 +43,7 @@ function VideoPage({
   const [likes, setLikes] = React.useState(0);
   const [secondsElapsed, setSecondsElapsed] = React.useState(0);
   const [projectId, setProjectId] = React.useState("");
-
+  const [relevantOnly, setRelevantOnly] = React.useState(false);
   const [videoUrl, setVideoUrl] = React.useState<File | null>(null);
 
   const [selectedUsers, setSelectedUsers] = React.useState<Selection>(
@@ -197,6 +198,9 @@ function VideoPage({
         <div className="flex flex-row justify-between max-w-7xl">
           <h1 className="text-xl font-bold">{video.data.title}</h1>
           <div className="flex flex-row gap-2 items-center">
+            <Switch isSelected={relevantOnly} onValueChange={setRelevantOnly}>
+              Relevant Only
+            </Switch>
             <Button size="sm" onClick={onOpen}>
               Upload new version
             </Button>
@@ -250,6 +254,7 @@ function VideoPage({
       <div className="flex flex-col max-w-7xl">
         <DescriptionSection video={video} />
         <CommentsSection
+          relevantOnly={relevantOnly}
           goToTime={goToTime}
           projectId={projectId}
           secondsElapsed={secondsElapsed}

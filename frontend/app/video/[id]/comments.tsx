@@ -17,6 +17,7 @@ interface CommentsSectionProps {
   projectId: string;
   selectedUsers: Selection;
   usersInTheProject: UserT[];
+  relevantOnly?: boolean;
 }
 export default function CommentsSection({
   video,
@@ -25,6 +26,7 @@ export default function CommentsSection({
   projectId,
   selectedUsers,
   usersInTheProject,
+  relevantOnly,
 }: CommentsSectionProps) {
   const [commentsList, setCommentsList] = useState<Array<CommentT>>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -91,15 +93,17 @@ export default function CommentsSection({
     return text.content.includes(`@${selectedUsers.values().next().value}`);
   });
 
-  const inTimeTexts = filteredTexts.filter((text) => {
-    const [startMin, startSec] = text.start.split(":").map(Number);
-    const [endMin, endSec] = text.end.split(":").map(Number);
-    const seconds = Math.floor(secondsElapsed);
+  const inTimeTexts = relevantOnly
+    ? filteredTexts.filter((text) => {
+        const [startMin, startSec] = text.start.split(":").map(Number);
+        const [endMin, endSec] = text.end.split(":").map(Number);
+        const seconds = Math.floor(secondsElapsed);
 
-    return (
-      seconds >= startMin * 60 + startSec && seconds <= endMin * 60 + endSec
-    );
-  });
+        return (
+          seconds >= startMin * 60 + startSec && seconds <= endMin * 60 + endSec
+        );
+      })
+    : filteredTexts;
 
   const handleDeleteComment = React.useCallback((commendId: string) => {
     Video.deleteComment(user, commendId, video.data.id)

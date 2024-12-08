@@ -121,7 +121,27 @@ export default function CommentsSection({
   if (!user) return null;
 
   return (
-    <div className="">
+    <div className="comments-section">
+      <div className="">
+        {inTimeTexts.length === 0 ? (
+          <p className="py-4">
+            No comments yet or No comments for this part of the video yet. Be
+            the first to comment!
+          </p>
+        ) : (
+          <div style={{ overflowY: "auto", maxHeight: "500px" }}>
+            {inTimeTexts.map((comment) => (
+              <Comment
+                key={comment.id}
+                comment={comment}
+                deleteComment={handleDeleteComment}
+                goToTime={goToTime}
+                video={video}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       <div className="py-4 flex flex-row gap-4 items-start">
         <Avatar src={user.data.profilePicture} />{" "}
         <div className="flex-1">
@@ -145,14 +165,13 @@ export default function CommentsSection({
           {isTyping && (
             <div className="flex gap-2 mt-2 justify-end">
               <div className="flex gap-2 items-center">
-                from
                 <TimeInput
                   minutes={startMinutes}
                   seconds={startSeconds}
                   setMinutes={setStartMinutes}
                   setSeconds={setStartSeconds}
                 />
-                to
+                ~
                 <TimeInput
                   minutes={endMinutes}
                   seconds={endSeconds}
@@ -174,24 +193,6 @@ export default function CommentsSection({
             </div>
           )}
         </div>
-      </div>
-      <div className="">
-        {inTimeTexts.length === 0 ? (
-          <p className="py-4">
-            No comments yet or No comments for this part of the video yet. Be
-            the first to comment!
-          </p>
-        ) : (
-          inTimeTexts.map((comment) => (
-            <Comment
-              key={comment.id}
-              comment={comment}
-              deleteComment={handleDeleteComment}
-              goToTime={goToTime}
-              video={video}
-            />
-          ))
-        )}
       </div>
     </div>
   );

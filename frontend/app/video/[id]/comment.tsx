@@ -169,9 +169,9 @@ export default function Comment({
   }
 
   return (
-    <div className="py-3 shadow-none flex flex-row gap-4 items-start w-full">
+    <div className="py-3 shadow-none flex flex-row gap-4 items-start">
       <Avatar src={comment.user.profileUrl} />
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col">
         <div className="flex items-center gap-2">
           <p className="text-sm font-semibold">{comment.user.name}</p>
           <p className="text-xs text-gray-500">
@@ -199,14 +199,13 @@ export default function Comment({
             /> */}
             <div className="flex gap-2 mt-2 justify-end">
               <div className="flex gap-2 items-center">
-                from
                 <TimeInput
                   minutes={startMinutes}
                   seconds={startSeconds}
                   setMinutes={setStartMinutes}
                   setSeconds={setStartSeconds}
                 />
-                to
+                ~
                 <TimeInput
                   minutes={endMinutes}
                   seconds={endSeconds}

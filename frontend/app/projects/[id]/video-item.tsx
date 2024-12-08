@@ -17,7 +17,7 @@ import Project, { ProjectVideoT } from "@/src/API/project";
 
 interface VideoItemProps {
   video: ProjectVideoT;
-  deleteVideo: (id: string) => void;
+  deleteVideo: (video: ProjectVideoT) => void;
 }
 const VideoItem = ({ video, deleteVideo }: VideoItemProps) => {
   const {
@@ -50,6 +50,24 @@ const VideoItem = ({ video, deleteVideo }: VideoItemProps) => {
           <h1 className="font-bold text-xl text-foreground">{title}</h1>
         </div>
       </CardBody>
+      <CardFooter className="!p-0 flex flex-row justify-end py-2 items-center gap-x-4">
+        <Tooltip content="Delete Project" placement="top">
+          <div>
+            <Button
+              isIconOnly
+              className="bg-background"
+              radius="full"
+              size="sm"
+              onPress={() => deleteVideo(video)}
+            >
+              <FontAwesomeIcon
+                className="text-default-600 size-3"
+                icon={faTrash}
+              />
+            </Button>
+          </div>
+        </Tooltip>
+      </CardFooter>
     </Card>
   );
 };

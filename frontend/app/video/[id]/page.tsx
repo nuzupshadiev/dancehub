@@ -7,6 +7,7 @@ import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import {
   Button,
+  Input,
   Modal,
   ModalBody,
   ModalContent,
@@ -45,7 +46,8 @@ function VideoPage({
   const [projectId, setProjectId] = React.useState("");
   const [relevantOnly, setRelevantOnly] = React.useState(false);
   const [videoUrl, setVideoUrl] = React.useState<File | null>(null);
-
+  const [videoTitle, setVideoTitle] = React.useState("");
+  const [videoDescription, setVideoDescription] = React.useState("");
   const [selectedUsers, setSelectedUsers] = React.useState<Selection>(
     new Set([])
   );
@@ -75,6 +77,8 @@ function VideoPage({
       .getVideo(params.id, user)
       .then((video) => {
         setVideo(video);
+        setVideoTitle(video.data.title);
+        setVideoDescription(video.data.description);
         setLikes(video.data.likes);
         video.data.likedBy.forEach((likedBy) => {
           if (Number(likedBy.id) === user?.data.id) {
@@ -88,7 +92,16 @@ function VideoPage({
       .catch((err) => {
         setVideo(null);
       });
-  }, [params.id, user]);
+  }, [
+    params.id,
+    user,
+    setVideo,
+    setLikes,
+    setIsLiked,
+    setUsersInTheProject,
+    setVideoTitle,
+    setVideoDescription,
+  ]);
 
   const handleLike = React.useCallback(() => {
     if (!user || !video) {
@@ -111,17 +124,20 @@ function VideoPage({
         })
         .catch(() => {});
     }
-  }, [user, video, isLiked]);
+  }, [user, video, isLiked, setIsLiked, setLikes]);
 
-  const goToTime = React.useCallback((time: string) => {
-    const [minutes, seconds] = time.split(":").map(Number);
-    const goToTimeSeconds = minutes * 60 + seconds;
+  const goToTime = React.useCallback(
+    (time: string) => {
+      const [minutes, seconds] = time.split(":").map(Number);
+      const goToTimeSeconds = minutes * 60 + seconds;
 
-    if (playerRef.current) {
-      // @ts-ignore
-      playerRef.current.seekTo(goToTimeSeconds, "seconds");
-    }
-  }, []);
+      if (playerRef.current) {
+        // @ts-ignore
+        playerRef.current.seekTo(goToTimeSeconds, "seconds");
+      }
+    },
+    [playerRef, setSecondsElapsed]
+  );
 
   const handleSelectVersion = React.useCallback(
     (selected: Selection) => {
@@ -148,7 +164,7 @@ function VideoPage({
           setWarningMessage("An error occurred while fetching the video");
         });
     },
-    [params.id, user]
+    [params.id, user, setVideo, setLikes, setIsLiked]
   );
   const handleOnProgress = React.useCallback((state: OnProgressProps) => {
     setSecondsElapsed(state.playedSeconds);
@@ -164,6 +180,8 @@ function VideoPage({
     const formData = new FormData();
 
     formData.append("videoFile", videoUrl as File);
+    formData.append("title", videoTitle);
+    formData.append("description", videoDescription);
     video
       ?.update(user, formData)
       .then((video) => {
@@ -275,6 +293,20 @@ function VideoPage({
                 <VideoInput
                   setVideoSource={setVideoUrl}
                   videoSource={videoUrl}
+                />
+                <Input
+                  isRequired
+                  label={"Title"}
+                  type="text"
+                  value={videoTitle}
+                  onValueChange={setVideoTitle}
+                />
+                <Input
+                  isRequired
+                  label={"Description"}
+                  type="text"
+                  value={videoDescription}
+                  onValueChange={setVideoDescription}
                 />
                 {warningMessage && (
                   <p className="text-red-500 text-sm">{warningMessage}</p>

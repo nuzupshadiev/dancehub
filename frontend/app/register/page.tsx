@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import Link from "next/link";
@@ -13,7 +13,14 @@ function Register() {
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
-  const { setUser } = React.useContext(UserContext);
+  const { user, setUser } = React.useContext(UserContext);
+
+  useEffect(() => {
+    if (user) {
+      router.push("/projects");
+    }
+  }, [user]);
+
   const handleRegister = React.useCallback(() => {
     if (email === "" || password === "" || name === "") {
       setErrorMessage("Please fill all the fields to continue");

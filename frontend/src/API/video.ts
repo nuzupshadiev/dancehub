@@ -180,6 +180,25 @@ export default class Video {
     }).then((resp) => new Video(resp.data.video));
   }
 
+  static deleteVideo(
+    id: string,
+    user: UserContextT["user"]
+  ): Promise<AxiosResponse> {
+    if (!user) {
+      return Promise.reject("No user provided");
+    }
+
+    return Endpoint.request("delete", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/${id}`,
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+      params: {
+        videoId: id,
+      },
+    });
+  }
+
   static leaveComment(
     payload: {
       content: string;
@@ -279,7 +298,7 @@ export default class Video {
 
   static likeVideo(
     user: UserContextT["user"],
-    videoId: string,
+    videoId: string
   ): Promise<AxiosResponse> {
     if (!user) {
       return Promise.reject("No user provided");
@@ -336,7 +355,7 @@ export default class Video {
       },
       data: {
         content: replyText,
-        tags: tags
+        tags: tags,
       },
     }).then((resp) => resp.data.reply);
   }

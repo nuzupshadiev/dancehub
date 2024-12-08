@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,14 @@ function Login() {
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
   const router = useRouter();
-  const { setUser } = React.useContext(UserContext);
+  const { user, setUser } = React.useContext(UserContext);
+
+  useEffect(() => {
+    if (user) {
+      router.push("/projects");
+    }
+  }, [user]);
+
   const handleLogin = React.useCallback(() => {
     if (email === "" || password === "") {
       setErrorMessage("Please fill all the fields to continue");
@@ -29,7 +36,7 @@ function Login() {
         }
       })
       .catch(() => {
-        setErrorMessage("Invalid email or password");
+        setErrorMessage("Something went wrong, please try again later");
       });
   }, [email, password, setUser]);
 

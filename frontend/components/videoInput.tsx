@@ -1,5 +1,6 @@
 import { Button } from "@nextui-org/button";
 import React, { useRef, useState } from "react";
+import ReactPlayer from "react-player";
 
 interface VideoInputProps {
   videoSource: File | null; // Change to accept null initially
@@ -15,8 +16,9 @@ const VideoInput: React.FC<VideoInputProps> = ({
   setVideoSource,
 }) => {
   const videoInputRef = useRef<HTMLInputElement | null>(null); // Reference for video file input
-
+  const [isLoading, setIsLoading] = useState(false); // Loading state for video upload
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsLoading(true); // Set loading state to true
     const file = event.target.files?.[0];
 
     if (file) {
@@ -46,6 +48,8 @@ const VideoInput: React.FC<VideoInputProps> = ({
         </Button>
       )}
 
+      {/* Loading Indicator */}
+      {isLoading && <p>Uploading...</p>}
       {/* Video Preview */}
       {videoSource && (
         // eslint-disable-next-line jsx-a11y/media-has-caption
@@ -55,6 +59,7 @@ const VideoInput: React.FC<VideoInputProps> = ({
           height={height}
           src={URL.createObjectURL(videoSource)}
           width={width}
+          onCanPlayThrough={() => setIsLoading(false)}
         />
       )}
 

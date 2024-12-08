@@ -51,6 +51,7 @@ function VideoPage({
   const [selectedUsers, setSelectedUsers] = React.useState<Selection>(
     new Set([])
   );
+  const [isLoading, setIsLoading] = React.useState(false);
   const [selectedVersions, setSelectedVersions] = React.useState<Selection>(
     new Set([video?.data.version as string])
   );
@@ -172,9 +173,10 @@ function VideoPage({
 
   const onVideoUploadHandler = React.useCallback(() => {
     // create new video
+    setIsLoading(true);
     if (!videoUrl) {
       setWarningMessage("Please select a video file");
-
+      setIsLoading(false);
       return;
     }
     const formData = new FormData();
@@ -186,10 +188,12 @@ function VideoPage({
       ?.update(user, formData)
       .then((video) => {
         setVideo(video);
+        setIsLoading(false);
         onOpenChange();
         setWarningMessage("");
       })
       .catch(() => {
+        setIsLoading(false);
         setWarningMessage("An error occurred while uploading the video");
       });
   }, [videoUrl, video, user, onOpenChange]);
@@ -319,6 +323,7 @@ function VideoPage({
                   {"Cancel"}
                 </Button>
                 <Button
+                  isLoading={isLoading}
                   color="primary"
                   variant="solid"
                   onPress={onVideoUploadHandler}

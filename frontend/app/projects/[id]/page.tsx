@@ -46,6 +46,7 @@ function ProjectPage({
   const [videoDescription, setVideoDescription] = React.useState("");
   const [videoUrl, setVideoUrl] = React.useState<File | null>(null);
   const [code, setCode] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -83,8 +84,10 @@ function ProjectPage({
   }, []);
 
   const onVideoUploadHandler = React.useCallback(() => {
+    setIsLoading(true);
     if (!videoTitle || !videoDescription || !videoUrl) {
       setWarningMessage("Please fill out all fields");
+      setIsLoading(false);
       return;
     }
     // create new video
@@ -98,10 +101,12 @@ function ProjectPage({
     Video.createVideo(formData, user)
       .then((video) => {
         setVideos([...videos, video.data]);
+        setIsLoading(false);
         onCreateClose();
       })
       .catch((err) => {
         console.error(err);
+        setIsLoading(false);
         setWarningMessage("An error occurred while creating the video");
       });
   }, [
@@ -190,6 +195,7 @@ function ProjectPage({
               </Button>
               <Button
                 color="primary"
+                isLoading={isLoading}
                 variant="solid"
                 onPress={onVideoUploadHandler}
               >

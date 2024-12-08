@@ -185,8 +185,8 @@ function VideoPage({
   }
 
   return (
-    <div className="flex flex-col gap-2 p-4">
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-row gap-4 p-4">
+      <div className="flex flex-col gap-2 max-w-[65%]">
         <ReactPlayer
           ref={playerRef}
           controls
@@ -195,10 +195,10 @@ function VideoPage({
           width={"100%"}
           onProgress={handleOnProgress}
         />
-        <div className="flex flex-row justify-between max-w-7xl">
+        <div className="flex flex-col justify-between max-w-7xl">
           <h1 className="text-xl font-bold">{video.data.title}</h1>
           <div className="flex flex-row gap-2 items-center">
-            <div className="text-sm">Comments on Current Time</div>
+            <div className="text-sm">Play with Comments</div>
             <Switch
               isSelected={relevantOnly}
               onValueChange={setRelevantOnly}
@@ -252,9 +252,11 @@ function VideoPage({
             </div>
           </div>
         </div>
+        <div className="flex flex-col">
+          <DescriptionSection video={video} />
+        </div>
       </div>
-      <div className="flex flex-col max-w-7xl">
-        <DescriptionSection video={video} />
+      <div className="flex flex-col gap-2">
         <CommentsSection
           relevantOnly={relevantOnly}
           goToTime={goToTime}

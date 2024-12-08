@@ -29,22 +29,22 @@ export default function TimeInput({
   return (
     <div className="flex items-center gap-1">
       <Input
-        className="w-12"
+        className="w-10"
         maxLength={2}
-        placeholder="mm"
+        placeholder="m"
         size="sm"
-        type="number"
+        type="text"
         value={minutes}
         variant="bordered"
         onChange={handleMinutesChange}
       />
       <span>:</span>
       <Input
-        className="w-12"
+        className="w-10"
         maxLength={2}
-        placeholder="ss"
+        placeholder="s"
         size="sm"
-        type="number"
+        type="text"
         value={seconds}
         variant="bordered"
         onChange={handleSecondsChange}

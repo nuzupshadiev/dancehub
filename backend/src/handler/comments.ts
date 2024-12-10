@@ -13,7 +13,7 @@ async function GetComment(req: Request, res: Response) {
   const commentId = req.params.commentId;
 
   const [commentData] = await pool.query<RowDataPacket[]>(
-    `select comment.id as id, videoid, comment.version as version, start, end, userId, name, profilePicture, content, likes, modifiedAt from comment
+    `select comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt from comment
     inner join user on comment.userId = user.id
     where videoId = ? and comment.id = ?`,
     [videoId, commentId]
@@ -101,11 +101,9 @@ async function GetComments(req: Request, res: Response) {
   const version = new Date(versionString as string);
 
   const [commentsData] = await pool.query<RowDataPacket[]>(
-    `select comment.id as id, videoId, comment.version as version, start, end, userId, name, profilePicture, content, comment.likes as likes, modifiedAt, administratorId from comment
+    `select distinct comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt from comment
     inner join user on comment.userId = user.id
-    inner join video on comment.videoId = video.id
-    inner join project on video.projectId = project.id
-    where comment.videoId = ? and comment.version = ?`,
+    where videoId = ? and version = ?`,
     [videoId, version]
   );
 
@@ -166,7 +164,6 @@ async function GetComments(req: Request, res: Response) {
         name: comment.name,
         profileUrl: comment.profilePicture,
       },
-      isAdmin: req.user!.id === comment.administratorId,
       content: comment.content,
       likes: comment.likes,
       likedBy: likedBy,

@@ -140,7 +140,7 @@ export default function CommentsSection({
             the first to comment!
           </p>
         ) : (
-          <div className="overflow-y-scroll w-full max-h-[500px]">
+          <div className="overflow-y-scroll w-full max-h-[540px]">
             {sortedInTimeTexts.map((comment) => (
               <Comment
                 key={comment.id}

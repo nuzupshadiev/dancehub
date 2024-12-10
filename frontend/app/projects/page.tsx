@@ -120,7 +120,7 @@ function Page() {
   }
 
   return (
-    <div className="flex flex-col px-2 py-8 md:px-8">
+    <div className="flex flex-col py-8 md:px-8 w-full">
       <div className="flex flex-row justify-between">
         <div className="flex flex-row gap-x-4 items-center mb-4">
           <h1 className="text-2xl font-bold">{"Projects"}</h1>

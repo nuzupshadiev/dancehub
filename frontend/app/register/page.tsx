@@ -41,7 +41,7 @@ function Register() {
   }, [email, password, name, setUser]);
 
   return (
-    <div className="flex flex-col justify-center items-center h-full">
+    <div className="flex flex-col justify-center items-center h-full w-full">
       <div className="flex flex-col max-w-[500px] md:w-[500px] gap-4 px-14 items-center h-full justify-center">
         <div className="text-center">
           <h1 className="text-3xl font-semibold">Create Account in</h1>

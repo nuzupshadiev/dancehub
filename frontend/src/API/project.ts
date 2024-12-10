@@ -263,12 +263,12 @@ export default class Project {
     }
 
     return Endpoint.request<TagResponseT>("get", {
-      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/${projectId}/tags/${tagName}`,
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/${projectId}/tags/${tagName.substring(1)}`,
       headers: {
         Authorization: `Bearer ${user.token}`,
       },
       params: {
-        userId: user.data.id,
+        projectId: projectId,
         tagName: tagName,
       },
     }).then((resp) => {

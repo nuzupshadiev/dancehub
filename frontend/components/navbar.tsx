@@ -44,7 +44,7 @@ export const Navbar = () => {
   );
 
   return (
-    <NextUINavbar maxWidth="xl" position="sticky">
+    <NextUINavbar className="px-2" maxWidth="2xl" position="sticky">
       {user && (
         <div className="flex flex-row justify-center items-center gap-4">
           <User
@@ -60,7 +60,7 @@ export const Navbar = () => {
               window.location.href = "/projects";
             }}
           />
-          <Button onPress={handleLogout}>Logout</Button>
+          <Button onPress={handleLogout} variant="flat" color="danger">Logout</Button>
         </div>
       )}
       <NavbarContent justify="end">

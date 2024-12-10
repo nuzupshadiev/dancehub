@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { Input, Button, Avatar } from "@nextui-org/react";
+import { Selection } from "@nextui-org/react";
 
 import Comment from "./comment";
 
 import TimeInput from "@/components/timeinput";
 import Video, { CommentT } from "@/src/API/video";
 import { UserContext } from "@/utils/user-context";
-import { Selection } from "@nextui-org/react";
 import CommentInput from "@/components/commentInput";
 import { UserT } from "@/src/API/user";
 interface CommentsSectionProps {
@@ -132,7 +132,7 @@ export default function CommentsSection({
   if (!user) return null;
 
   return (
-    <div className="comments-section  bg-default-100 rounded-lg p-4 h-full">
+    <div className="flex flex-col comments-section  bg-default-100 rounded-lg p-4 justify-between h-full">
       <div className="">
         {inTimeTexts.length === 0 ? (
           <p className="py-4">
@@ -140,7 +140,7 @@ export default function CommentsSection({
             the first to comment!
           </p>
         ) : (
-          <div className="overflow-auto max-h-[500px] w-full">
+          <div className="overflow-y-scroll w-full max-h-[550px]">
             {sortedInTimeTexts.map((comment) => (
               <Comment
                 key={comment.id}
@@ -168,15 +168,6 @@ export default function CommentsSection({
             onChangeValue={setCommentText}
             onFocus={() => setIsTyping(true)}
           />
-          {/* <Input
-            fullWidth
-            placeholder="Add a public comment..."
-            size="sm"
-            value={commentText}
-            variant="underlined"
-            onFocus={() => setIsTyping(true)}
-            onValueChange={setCommentText}
-          /> */}
           {isTyping && (
             <div className="flex gap-2 mt-2 justify-end">
               <div className="flex gap-2 items-center">

@@ -220,6 +220,7 @@ export default class Video {
         content: payload.content,
         start: payload.start,
         end: payload.end,
+        tags: payload.tags,
       },
       headers: {
         Authorization: `Bearer ${user.token}`,

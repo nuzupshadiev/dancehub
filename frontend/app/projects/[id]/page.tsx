@@ -139,7 +139,7 @@ function ProjectPage({
   }
 
   return (
-    <div className="flex flex-col px-2 py-8 md:px-8">
+    <div className="flex flex-col px-2 py-8 md:px-8 w-full">
       {/* Actions bar */}
       <div className="flex flex-row flex-wrap justify-between items-center gap-4 mb-3">
         <div className="flex flex-row justify-center items-center gap-4">

@@ -83,7 +83,7 @@ function VideoPage({
         setVideo(video);
         setVideoTitle(video.data.title);
         setVideoDescription(video.data.description);
-        setLikes(video.data.likes);
+        setLikes(video.data.likedBy.length);
         video.data.likedBy.forEach((likedBy) => {
           if (Number(likedBy.id) === user?.data.id) {
             setIsLiked(true);
@@ -180,6 +180,7 @@ function VideoPage({
     if (!videoUrl) {
       setWarningMessage("Please select a video file");
       setIsLoading(false);
+
       return;
     }
     const formData = new FormData();
@@ -210,22 +211,22 @@ function VideoPage({
   }
 
   return (
-    <div className="flex flex-row gap-4 p-4 h-full">
-      <div className="flex flex-col gap-2 w-[70%] h-[80%]">
+    <div className="flex flex-row gap-4 p-8 w-full">
+      <div className="flex flex-col gap-2 items-start w-[70%]">
         <ReactPlayer
           ref={playerRef}
           controls
-          height={"100%"}
+          height={"500px"}
           url={video.data.videoUrl}
           width={"100%"}
           onProgress={handleOnProgress}
         />
-        <div className="flex flex-row justify-between max-w-7xl">
+        <div className="flex flex-row justify-between w-full">
           <h1 className="text-xl font-bold">{video.data.title}</h1>
           <div className="flex flex-row gap-2 items-center justify-end">
-            <div className="text-sm">Play with Comments</div>
+            <div className="text-sm">Realtime comments</div>
             <Switch isSelected={relevantOnly} onValueChange={setRelevantOnly} />
-            <Button size="sm" onClick={onOpen} color="primary">
+            <Button color="primary" size="sm" onPress={onOpen}>
               Upload new version
             </Button>
             <Select
@@ -238,6 +239,7 @@ function VideoPage({
             >
               {videoVersions.map((version) => {
                 const date = new Date(version);
+
                 return (
                   <SelectItem key={version} value={version}>
                     {date.toLocaleString()}
@@ -274,19 +276,19 @@ function VideoPage({
             </div>
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full grow">
           <DescriptionSection video={video} />
         </div>
       </div>
-      <div className="flex flex-col gap-2 grow h-[80%]">
+      <div className="flex flex-col gap-2 w-[35%] h-[90%]">
         <CommentsSection
-          relevantOnly={relevantOnly}
           goToTime={goToTime}
           projectId={projectId}
+          relevantOnly={relevantOnly}
           secondsElapsed={secondsElapsed}
           selectedUsers={selectedUsers}
-          video={video}
           usersInTheProject={usersInTheProject}
+          video={video}
         />
       </div>
 

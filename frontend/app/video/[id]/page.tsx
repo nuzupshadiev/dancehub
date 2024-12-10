@@ -168,7 +168,7 @@ function VideoPage({
           setWarningMessage("An error occurred while fetching the video");
         });
     },
-    [params.id, user, setVideo, setLikes, setIsLiked]
+    [params.id, user, setVideo, setLikes, setIsLiked, setWarningMessage]
   );
   const handleOnProgress = React.useCallback((state: OnProgressProps) => {
     setSecondsElapsed(state.playedSeconds);
@@ -200,7 +200,7 @@ function VideoPage({
         setIsLoading(false);
         setWarningMessage("An error occurred while uploading the video");
       });
-  }, [videoUrl, video, user, onOpenChange]);
+  }, [videoUrl, video, user, onOpenChange, videoTitle, videoDescription]);
 
   if (!user) {
     return <p>You need to be logged in to view this page</p>;

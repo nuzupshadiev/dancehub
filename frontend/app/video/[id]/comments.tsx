@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useState } from "react";
 import { Input, Button, Avatar } from "@nextui-org/react";
 import { Selection } from "@nextui-org/react";
@@ -28,7 +28,6 @@ export default function CommentsSection({
   usersInTheProject,
   relevantOnly,
 }: CommentsSectionProps) {
-  const [commentsList, setCommentsList] = useState<Array<CommentT>>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [startMinutes, setStartMinutes] = useState("");
@@ -36,6 +35,8 @@ export default function CommentsSection({
   const [endMinutes, setEndMinutes] = useState("");
   const [endSeconds, setEndSeconds] = useState("");
   const [hashtags, setHashtags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [commentsList, setCommentsList] = useState<CommentT[]>([]);
   const { user } = React.useContext(UserContext);
   const handleCancel = React.useCallback(() => {
     setCommentText("");
@@ -46,14 +47,13 @@ export default function CommentsSection({
     setIsTyping(false);
   }, []);
 
-  useEffect(() => {
-    Video.getComments(video.data.id, user, video.data.version).then(
-      (comments) => {
-        setCommentsList(comments);
-      }
-    );
-  }, [video, user]);
-
+  React.useEffect(() => {
+    if (!user || !video?.data.id || !video?.data.version) return;
+    Video.getComments(video.data.id, user, video.data.version)
+      .then((comments) => setCommentsList(comments))
+      .catch(() => setCommentsList([]));
+  }, [user, video?.data.id, video?.data.version]);
+  
   const handleCommentSubmit = React.useCallback(() => {
     if (
       startMinutes === "" ||
@@ -65,6 +65,7 @@ export default function CommentsSection({
     ) {
       return;
     }
+    setIsLoading(true);
     Video.leaveComment(
       {
         start: `${Number(startMinutes)}:${Number(startSeconds)}`,
@@ -75,11 +76,27 @@ export default function CommentsSection({
       video.data.id,
       user,
       video.data.version
-    ).then((comment) => {
-      setCommentsList((prev) => [...prev, comment.comment]);
-    });
-    setCommentText("");
-    setIsTyping(false);
+    )
+      .then((comment) => {
+        setIsLoading(false);
+        setCommentText("");
+        setStartMinutes("");
+        setStartSeconds("");
+        setEndMinutes("");
+        setEndSeconds("");
+        setIsTyping(false);
+        setCommentsList((prev) => [...prev, comment.comment]);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        setCommentText("");
+        setStartMinutes("");
+        setStartSeconds("");
+        setEndMinutes("");
+        setEndSeconds("");
+        setIsTyping(false);
+        console.log(err);
+      });
   }, [
     user,
     commentText,
@@ -90,25 +107,30 @@ export default function CommentsSection({
     hashtags,
   ]);
 
-  const filteredTexts = commentsList.filter((text) => {
-    if (selectedUsers === "all") return true;
-    else if (selectedUsers.size === 0) return true;
+  const filteredTexts = React.useMemo(() => {
+    if (selectedUsers === "all" || selectedUsers.size === 0)
+      return commentsList;
 
-    return text.content.includes(`@${selectedUsers.values().next().value}`);
-  });
+    const selectedUserArray = Array.from(selectedUsers.values());
+    return commentsList.filter((text) =>
+      selectedUserArray.some((user) => text.content.includes(`@${user}`))
+    );
+  }, [commentsList, selectedUsers]);
 
-  const inTimeTexts = relevantOnly
-    ? filteredTexts.filter((text) => {
-        const [startMin, startSec] = text.start.split(":").map(Number);
-        const [endMin, endSec] = text.end.split(":").map(Number);
-        const seconds = Math.floor(secondsElapsed);
+  const inTimeTexts = React.useMemo(() => {
+    if (!relevantOnly) return filteredTexts;
 
-        return (
-          seconds >= startMin * 60 + startSec - 3 &&
-          seconds <= endMin * 60 + endSec + 3
-        );
-      })
-    : filteredTexts;
+    return filteredTexts.filter((text) => {
+      const [startMin, startSec] = text.start.split(":").map(Number);
+      const [endMin, endSec] = text.end.split(":").map(Number);
+      const seconds = Math.floor(secondsElapsed);
+
+      return (
+        seconds >= startMin * 60 + startSec - 3 &&
+        seconds <= endMin * 60 + endSec + 3
+      );
+    });
+  }, [filteredTexts, relevantOnly, secondsElapsed]);
 
   const handleDeleteComment = React.useCallback((commendId: string) => {
     Video.deleteComment(user, commendId, video.data.id)
@@ -122,19 +144,21 @@ export default function CommentsSection({
       });
   }, []);
 
-  const sortedInTimeTexts = inTimeTexts.sort((a, b) => {
-    const [startMinA, startSecA] = a.start.split(":").map(Number);
-    const [startMinB, startSecB] = b.start.split(":").map(Number);
+  const sortedInTimeTexts = useMemo(() => {
+    return inTimeTexts.sort((a, b) => {
+      const [startMinA, startSecA] = a.start.split(":").map(Number);
+      const [startMinB, startSecB] = b.start.split(":").map(Number);
 
-    return startMinA * 60 + startSecA - (startMinB * 60 + startSecB);
-  });
+      return startMinA * 60 + startSecA - (startMinB * 60 + startSecB);
+    });
+  }, [inTimeTexts]);
 
   if (!user) return null;
 
   return (
     <div className="flex flex-col comments-section  bg-default-100 rounded-lg p-4 justify-between h-full">
       <div className="">
-        {inTimeTexts.length === 0 ? (
+        {sortedInTimeTexts.length === 0 ? (
           <p className="py-4">
             No comments yet or No comments for this part of the video yet. Be
             the first to comment!
@@ -191,6 +215,7 @@ export default function CommentsSection({
               <Button
                 color="primary"
                 disabled={!commentText.trim()}
+                isLoading={isLoading}
                 size="sm"
                 onPress={handleCommentSubmit}
               >

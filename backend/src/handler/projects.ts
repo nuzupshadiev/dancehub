@@ -407,6 +407,7 @@ async function GetTagRelated(req: Request, res: Response) {
   const comments = commentTagData.map((row) => {
     return {
       project: row.projectId,
+      id: row.videoId,
       title: row.title,
       version: row.version,
       content: row.content,
@@ -427,6 +428,7 @@ async function GetTagRelated(req: Request, res: Response) {
   const replies = replyTagData.map((row) => {
     return {
       project: row.projectId,
+      id: row.videoId,
       title: row.title,
       version: row.version,
       content: row.content,

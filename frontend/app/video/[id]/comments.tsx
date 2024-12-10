@@ -52,8 +52,8 @@ export default function CommentsSection({
     Video.getComments(video.data.id, user, video.data.version)
       .then((comments) => setCommentsList(comments))
       .catch(() => setCommentsList([]));
-  }, [user, video?.data.id, video?.data.version]);
-  
+  }, [user, video?.data.id, video?.data.version, video]);
+
   const handleCommentSubmit = React.useCallback(() => {
     if (
       startMinutes === "" ||
@@ -107,30 +107,42 @@ export default function CommentsSection({
     hashtags,
   ]);
 
-  const filteredTexts = React.useMemo(() => {
-    if (selectedUsers === "all" || selectedUsers.size === 0)
-      return commentsList;
+  const finalComments = React.useMemo(() => {
+    // Start with the full list
+    let result = commentsList;
 
-    const selectedUserArray = Array.from(selectedUsers.values());
-    return commentsList.filter((text) =>
-      selectedUserArray.some((user) => text.content.includes(`@${user}`))
-    );
-  }, [commentsList, selectedUsers]);
+    // Filter by relevant time if necessary
+    if (relevantOnly) {
+      result = result.filter((text) => {
+        const [startMin, startSec] = text.start.split(":").map(Number);
+        const [endMin, endSec] = text.end.split(":").map(Number);
+        const seconds = Math.floor(secondsElapsed);
 
-  const inTimeTexts = React.useMemo(() => {
-    if (!relevantOnly) return filteredTexts;
+        return (
+          seconds >= startMin * 60 + startSec - 3 &&
+          seconds <= endMin * 60 + endSec + 3
+        );
+      });
+    }
 
-    return filteredTexts.filter((text) => {
-      const [startMin, startSec] = text.start.split(":").map(Number);
-      const [endMin, endSec] = text.end.split(":").map(Number);
-      const seconds = Math.floor(secondsElapsed);
-
-      return (
-        seconds >= startMin * 60 + startSec - 3 &&
-        seconds <= endMin * 60 + endSec + 3
+    // Filter by selected users if necessary
+    if (!(selectedUsers === "all" || selectedUsers.size === 0)) {
+      const selectedUserArray = Array.from(selectedUsers.values());
+      result = result.filter((text) =>
+        selectedUserArray.some((user) => text.content.includes(`@${user}`))
       );
+    }
+
+    // Sort by start time
+    result = [...result].sort((a, b) => {
+      const [startMinA, startSecA] = a.start.split(":").map(Number);
+      const [startMinB, startSecB] = b.start.split(":").map(Number);
+
+      return startMinA * 60 + startSecA - (startMinB * 60 + startSecB);
     });
-  }, [filteredTexts, relevantOnly, secondsElapsed]);
+
+    return result;
+  }, [commentsList, selectedUsers, relevantOnly, secondsElapsed]);
 
   const handleDeleteComment = React.useCallback((commendId: string) => {
     Video.deleteComment(user, commendId, video.data.id)
@@ -144,28 +156,19 @@ export default function CommentsSection({
       });
   }, []);
 
-  const sortedInTimeTexts = useMemo(() => {
-    return inTimeTexts.sort((a, b) => {
-      const [startMinA, startSecA] = a.start.split(":").map(Number);
-      const [startMinB, startSecB] = b.start.split(":").map(Number);
-
-      return startMinA * 60 + startSecA - (startMinB * 60 + startSecB);
-    });
-  }, [inTimeTexts]);
-
   if (!user) return null;
 
   return (
     <div className="flex flex-col comments-section  bg-default-100 rounded-lg p-4 justify-between h-full">
       <div className="">
-        {sortedInTimeTexts.length === 0 ? (
+        {finalComments.length === 0 ? (
           <p className="py-4">
             No comments yet or No comments for this part of the video yet. Be
             the first to comment!
           </p>
         ) : (
           <div className="overflow-y-scroll w-full max-h-[540px]">
-            {sortedInTimeTexts.map((comment) => (
+            {finalComments.map((comment) => (
               <Comment
                 key={comment.id}
                 comment={comment}

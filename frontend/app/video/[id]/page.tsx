@@ -60,7 +60,7 @@ function VideoPage({
   const [warningMessage, setWarningMessage] = React.useState("");
   const videoVersions = React.useMemo(() => {
     return video?.data.versions.map((version) => version) || [];
-  }, [video?.data.versions]);
+  }, [video]);
 
   React.useEffect(() => {
     setVideoUrl(null);
@@ -79,17 +79,17 @@ function VideoPage({
     }
     VideoAPI.default
       .getVideo(params.id, user)
-      .then((video) => {
-        setVideo(video);
-        setVideoTitle(video.data.title);
-        setVideoDescription(video.data.description);
-        setLikes(video.data.likedBy.length);
-        video.data.likedBy.forEach((likedBy) => {
+      .then((videoResp) => {
+        setVideo(videoResp);
+        setVideoTitle(videoResp.data.title);
+        setVideoDescription(videoResp.data.description);
+        setLikes(videoResp.data.likedBy.length);
+        videoResp.data.likedBy.forEach((likedBy) => {
           if (Number(likedBy.id) === user?.data.id) {
             setIsLiked(true);
           }
         });
-        Project.getProject(user, video.data.project).then((project) => {
+        Project.getProject(user, videoResp.data.project).then((project) => {
           setUsersInTheProject(project.data.members);
         });
       })
@@ -150,15 +150,15 @@ function VideoPage({
       const stringVersion = selected.values().next().value as string;
 
       Video.getVideoVersion(params.id, stringVersion, user)
-        .then((video) => {
-          setVideo(video);
-          setLikes(video.data.likedBy.length);
+        .then((videoResp) => {
+          setVideo(videoResp);
+          setLikes(videoResp.data.likedBy.length);
           setIsLiked(
-            video.data.likedBy.some(
+            videoResp.data.likedBy.some(
               (likedBy) => likedBy.id === user?.data.id.toString()
             )
           );
-          video.data.likedBy.forEach((likedBy) => {
+          videoResp.data.likedBy.forEach((likedBy) => {
             if (Number(likedBy.id) === user?.data.id) {
               setIsLiked(true);
             }
@@ -190,8 +190,9 @@ function VideoPage({
     formData.append("description", videoDescription);
     video
       ?.update(user, formData)
-      .then((video) => {
-        setVideo(video);
+      .then((videoResp) => {
+        setVideo(videoResp);
+        setSelectedVersions(new Set([videoResp.data.version as string]));
         setIsLoading(false);
         onOpenChange();
         setWarningMessage("");
@@ -280,6 +281,8 @@ function VideoPage({
           <DescriptionSection video={video} />
         </div>
       </div>
+
+      {/* COMMENTS SECTION */}
       <div className="flex flex-col gap-2 w-[35%] h-[90%]">
         <CommentsSection
           goToTime={goToTime}
@@ -291,7 +294,7 @@ function VideoPage({
           video={video}
         />
       </div>
-
+      {/* MODAL FOR UPLOADING */}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (

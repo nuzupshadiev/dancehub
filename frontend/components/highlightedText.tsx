@@ -133,24 +133,22 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                All videos for {currentMatch} in project {projectTitle}
+                All comments for {currentMatch}
               </ModalHeader>
               <ModalBody>
-                {listOfComments.map((comment, index) => (
-                  <div key={index} className="cursor-pointer">
-                    <h1>{comment.title}</h1>
-                    <p>{comment.content}</p>
-                  </div>
-                ))}
+                <div>
+                  {listOfComments.length === 0 ? (
+                    listOfComments.map((comment, index) => (
+                      <div key={index} className="cursor-pointer">
+                        <h1>{comment.title}</h1>
+                        <p>{comment.content}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No comments with this hashtag yet</p>
+                  )}
+                </div>
               </ModalBody>
-              {/* <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                <Button color="primary" onPress={onClose}>
-                  Action
-                </Button>
-              </ModalFooter> */}
             </>
           )}
         </ModalContent>

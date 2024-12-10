@@ -63,7 +63,7 @@ app.put(
   videos.UpdateVideo
 );
 app.delete("/api/videos/:videoId", jwtMiddleware, videos.DeleteVideo);
-app.get("/api/videos/list/:projectId", videos.GetVideoList);
+app.get("/api/videos/list/:projectId", jwtMiddleware, videos.GetVideoList);
 app.post("/api/videos/:videoId/like", jwtMiddleware, videos.LikeVideo);
 app.post("/api/videos/:videoId/unlike", jwtMiddleware, videos.UnlikeVideo);
 

@@ -40,6 +40,12 @@ function Login() {
       });
   }, [email, password, setUser]);
 
+  const handleOnKeyDown = React.useCallback<
+    React.KeyboardEventHandler<HTMLInputElement>
+  >((e) => {
+    e.key === "Enter" && handleLogin();
+  }, []);
+
   return (
     <div className="flex flex-col justify-center items-center h-full">
       <div className="flex flex-col max-w-[500px] md:w-[500px] gap-4 px-14 items-center h-full justify-center">
@@ -54,24 +60,16 @@ function Login() {
           placeholder="Enter your email"
           value={email}
           variant="underlined"
+          onKeyDown={handleOnKeyDown}
           onValueChange={setEmail}
-          onKeyDown={(e: KeyboardEvent) => {
-            if (e.key === "Enter") {
-              handleLogin();
-            }
-          }}
         />
         <Input
           label={"Password"}
           type="password"
           value={password}
           variant="underlined"
+          onKeyDown={handleOnKeyDown}
           onValueChange={setPassword}
-          onKeyDown={(e: KeyboardEvent) => {
-            if (e.key === "Enter") {
-              handleLogin();
-            }
-          }}
         />
         {errorMessage && (
           <p className="text-red-500 text-xs text-start w-full">

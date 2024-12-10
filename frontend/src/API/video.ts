@@ -31,6 +31,7 @@ export type ReplyT = {
   modifiedAt: string;
 };
 export type VideoT = {
+  isAdmin: boolean;
   project: string;
   id: string;
   title: string;
@@ -43,6 +44,7 @@ export type VideoT = {
   versions: string[];
   version: string;
   comments: CommentT[];
+  
 };
 type VideosResponseT = {
   message: string;

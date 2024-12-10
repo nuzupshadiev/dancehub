@@ -56,6 +56,7 @@ export type ProjectVideoT = {
   title: string;
   description: string;
   thumbnailUrl: string;
+  isAdmin: boolean;
 };
 export type ProjectVideosT = {
   totalVideos: number;

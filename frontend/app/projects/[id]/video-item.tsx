@@ -26,13 +26,14 @@ const VideoItem = ({ video, deleteVideo }: VideoItemProps) => {
     onOpen: onProjectSettingOpen,
     onOpenChange: onProjectSettingOpenChange,
   } = useDisclosure();
-
-  const {user} = React.useContext(UserContext);
+  const { user } = React.useContext(UserContext);
 
   // const isAdmin = Number() === user?.data.id;
   const { id, title, thumbnailUrl, description } = video;
 
   const router = useRouter();
+
+  // const isAdmin = user?.data.id === video.
 
   return (
     <Card
@@ -55,22 +56,24 @@ const VideoItem = ({ video, deleteVideo }: VideoItemProps) => {
         </div>
       </CardBody>
       <CardFooter className="!p-0 flex flex-row justify-end py-2 items-center gap-x-4">
-        <Tooltip content="Delete Project" placement="top">
-          <div>
-            <Button
-              isIconOnly
-              className="bg-background"
-              radius="full"
-              size="sm"
-              onPress={() => deleteVideo(video)}
-            >
-              <FontAwesomeIcon
-                className="text-default-600 size-3"
-                icon={faTrash}
-              />
-            </Button>
-          </div>
-        </Tooltip>
+        {video.isAdmin && (
+          <Tooltip content="Delete Project" placement="top">
+            <div>
+              <Button
+                isIconOnly
+                className="bg-background"
+                radius="full"
+                size="sm"
+                onPress={() => deleteVideo(video)}
+              >
+                <FontAwesomeIcon
+                  className="text-default-600 size-3"
+                  icon={faTrash}
+                />
+              </Button>
+            </div>
+          </Tooltip>
+        )}
       </CardFooter>
     </Card>
   );

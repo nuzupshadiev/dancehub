@@ -157,7 +157,15 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
                           role="button"
                           tabIndex={0}
                         >
-                          <h1 className="font-semibold">{`${comment.title} | ${date.toLocaleString()}`}</h1>
+                          <div className="flex flex-row gap-2 items-center">
+                            <p className="text-sm font-semibold">
+                              {comment.title}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {date.toLocaleString()}
+                            </p>
+                          </div>
+                          {/* <h1 className="font-semibold">{`${comment.title} | ${date.toLocaleString()}`}</h1> */}
                           <p>
                             {comment.content.length > 150
                               ? `${comment.content.slice(0, 50)}...`

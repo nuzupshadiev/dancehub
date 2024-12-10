@@ -312,15 +312,10 @@ async function GetVideoList(req: Request, res: Response) {
   const projectId = req.params.projectId;
 
   const videosData = await pool.query<RowDataPacket[]>(
-    "SELECT distinct id, title, description FROM video WHERE projectId = ?",
+    `SELECT distinct id, title, description, uploaderId FROM video 
+    WHERE projectId = ?`,
     [projectId]
   );
-
-  const videos = videosData[0].map((video) => ({
-    id: video.id,
-    title: video.title,
-    description: video.description,
-  }));
 
   const [projectData] = await pool.query<RowDataPacket[]>(
     "SELECT title FROM project WHERE id = ?",
@@ -332,6 +327,15 @@ async function GetVideoList(req: Request, res: Response) {
   }
 
   const title = projectData[0].title;
+
+  const videos = videosData[0].map((video) => ({
+    id: video.id,
+    title: video.title,
+    description: video.description,
+    isAdmin:
+      req.user!.id == video.uploaderId ||
+      req.user!.id == projectData[0].administratorId,
+  }));
 
   res.json({
     totalVideos: videos.length,

@@ -64,6 +64,9 @@ function VideoPage({
 
   React.useEffect(() => {
     setVideoUrl(null);
+    setVideoTitle("");
+    setVideoDescription("");
+    setWarningMessage("");
   }, [onOpenChange]);
 
   React.useEffect(() => {
@@ -207,8 +210,8 @@ function VideoPage({
   }
 
   return (
-    <div className="flex flex-row gap-4 p-4">
-      <div className="flex flex-col gap-2 max-w-[65%]">
+    <div className="flex flex-row gap-4 p-4 h-full">
+      <div className="flex flex-col gap-2 w-[70%] h-[80%]">
         <ReactPlayer
           ref={playerRef}
           controls
@@ -217,15 +220,12 @@ function VideoPage({
           width={"100%"}
           onProgress={handleOnProgress}
         />
-        <div className="flex flex-col justify-between max-w-7xl">
+        <div className="flex flex-row justify-between max-w-7xl">
           <h1 className="text-xl font-bold">{video.data.title}</h1>
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row gap-2 items-center justify-end">
             <div className="text-sm">Play with Comments</div>
-            <Switch
-              isSelected={relevantOnly}
-              onValueChange={setRelevantOnly}
-            ></Switch>
-            <Button size="sm" onClick={onOpen}>
+            <Switch isSelected={relevantOnly} onValueChange={setRelevantOnly} />
+            <Button size="sm" onClick={onOpen} color="primary">
               Upload new version
             </Button>
             <Select
@@ -278,7 +278,7 @@ function VideoPage({
           <DescriptionSection video={video} />
         </div>
       </div>
-      <div className="flex flex-col gap-2 grow">
+      <div className="flex flex-col gap-2 grow h-[80%]">
         <CommentsSection
           relevantOnly={relevantOnly}
           goToTime={goToTime}

@@ -28,6 +28,14 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
   const [listOfVideos, setListOfVideos] = React.useState<
     { desription: string; id: string; title: string }[]
   >([]);
+  const [listOfComments, setListOfComments] = React.useState<
+    {
+      project: string;
+      title: string;
+      version: string;
+      content: string;
+    }[]
+  >([]);
   const [projectTitle, setProjectTitle] = React.useState("");
   const router = useRouter();
 
@@ -43,8 +51,10 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
   React.useEffect(() => {
     if (!user) return;
     Project.getTagRelatedVideos(user, projectId, currentMatch).then((resp) => {
-      setListOfVideos(resp.videos);
-      setProjectTitle(resp.title);
+      const comments = [resp.comments, resp.replies].flat();
+
+      setListOfComments(comments);
+      // setProjectTitle(resp.title);
     });
   }, [currentMatch, user, projectId]);
   // Regular expressions to match mentions and tags
@@ -78,6 +88,7 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
 
       // Add highlighted text
       parts.push(
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
         <span
           key={`highlight-${matchStart}`}
           className={
@@ -125,30 +136,11 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
                 All videos for {currentMatch} in project {projectTitle}
               </ModalHeader>
               <ModalBody>
-                {listOfVideos.map((video) => (
-                  <Card
-                    key={video.id}
-                    disableRipple
-                    isPressable
-                    as={"div"}
-                    className={
-                      "flex flex-col gap-y-2 border-2 border-transparent hover:border-primary-600 bg-primary-50 dark:bg-darkBg-900 p-4"
-                    }
-                    onPress={() => handleGotoProject(video)}
-                  >
-                    <CardBody className=" flex flex-row gap-4 !p-0 ml-1 h-20">
-                      {/* <img
-                      alt="thumbnail"
-                      className="object-fit rounded-lg"
-                      src={thumbnailUrl}
-                    /> */}
-                      <div>
-                        <h1 className="font-bold text-xl text-foreground">
-                          {video.title}
-                        </h1>
-                      </div>
-                    </CardBody>
-                  </Card>
+                {listOfComments.map((comment, index) => (
+                  <div key={index} className="cursor-pointer">
+                    <h1>{comment.title}</h1>
+                    <p>{comment.content}</p>
+                  </div>
                 ))}
               </ModalBody>
               <ModalFooter>

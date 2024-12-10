@@ -20,6 +20,26 @@ export type TagVideoT = {
   title: string;
   version: string;
 };
+export type TagResponseT = {
+  tag: string;
+  project: string;
+  comments: {
+    project: string;
+    title: string;
+    version: string;
+    content: string;
+  }[];
+  replies: {
+    project: string;
+    title: string;
+    version: string;
+    content: string;
+  }[];
+  related: {
+    id: string;
+    title: string;
+  }[];
+};
 export type TagVideosT = TagVideoT[];
 
 export type ProjectT = {
@@ -237,23 +257,13 @@ export default class Project {
     user: UserContextT["user"],
     projectId: string,
     tagName: string
-  ): Promise<{
-    project: string;
-    title: string;
-    totalVideos: number;
-    videos: { desription: string; id: string; title: string }[];
-  }> {
+  ): Promise<TagResponseT> {
     if (!user) {
       return Promise.reject("No user provided");
     }
 
-    return Endpoint.request<{
-      project: string;
-      title: string;
-      totalVideos: number;
-      videos: { desription: string; id: string; title: string }[];
-    }>("get", {
-      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}videos/list/${projectId}`,
+    return Endpoint.request<TagResponseT>("get", {
+      url: `${process.env.NEXT_PUBLIC_BACKEND_ENDPOINT}projects/${projectId}/tags/${tagName}`,
       headers: {
         Authorization: `Bearer ${user.token}`,
       },

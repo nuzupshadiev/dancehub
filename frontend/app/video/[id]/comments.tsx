@@ -132,7 +132,7 @@ export default function CommentsSection({
   if (!user) return null;
 
   return (
-    <div className="comments-section  bg-default-100 rounded-lg p-4">
+    <div className="comments-section  bg-default-100 rounded-lg p-4 h-full">
       <div className="">
         {inTimeTexts.length === 0 ? (
           <p className="py-4">

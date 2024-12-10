@@ -68,8 +68,12 @@ app.post("/api/videos/:videoId/like", jwtMiddleware, videos.LikeVideo);
 app.post("/api/videos/:videoId/unlike", jwtMiddleware, videos.UnlikeVideo);
 
 // Comments API routes
-app.get("/api/videos/:videoId/comments/:commentId", comments.GetComment);
-app.get("/api/videos/:videoId/comments", comments.GetComments);
+app.get(
+  "/api/videos/:videoId/comments/:commentId",
+  jwtMiddleware,
+  comments.GetComment
+);
+app.get("/api/videos/:videoId/comments", jwtMiddleware, comments.GetComments);
 app.post("/api/videos/:videoId/comments", jwtMiddleware, comments.AddComment);
 app.put(
   "/api/videos/:videoId/comments/:commentId",

@@ -8,6 +8,7 @@ import {
 } from "mysql2";
 import { generateToken } from "../services/authService";
 import { GetUserInfo } from "./users";
+import { CreateSample } from "../services/sampleProject";
 
 async function Login(req: Request, res: Response) {
   const name = req.body.name;
@@ -73,6 +74,8 @@ async function Register(req: Request, res: Response) {
   if (user === null) {
     return res.status(500).json({ message: "Failed to fetch user" });
   }
+
+  await CreateSample(insertData.insertId);
 
   res.status(200).json({
     message: "User registered successfully",

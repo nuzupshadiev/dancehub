@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ThemeProviderProps } from "next-themes/dist/types";
 import { Spinner } from "@nextui-org/react";
-import { UserContext } from "@/utils/user-context";
+import { UserContext, VideoVersionContext } from "@/utils/user-context";
 import User from "@/src/API/user";
 
 export interface ProvidersProps {
@@ -18,6 +18,10 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   const router = useRouter();
   const [user, setUser] =
     React.useState<React.ContextType<typeof UserContext>["user"]>(undefined);
+  const [videoVersion, setVideoVersion] =
+    React.useState<
+      React.ContextType<typeof VideoVersionContext>["videoVersion"]
+    >("");
 
   React.useEffect(() => {
     const token = localStorage.getItem("thunderhawks-token");
@@ -37,9 +41,11 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   return (
     <React.Suspense fallback={<Spinner />}>
       <UserContext.Provider value={{ user, setUser }}>
-        <NextUIProvider navigate={router.push}>
-          <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
-        </NextUIProvider>
+        <VideoVersionContext.Provider value={{ videoVersion, setVideoVersion }}>
+          <NextUIProvider navigate={router.push}>
+            <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+          </NextUIProvider>
+        </VideoVersionContext.Provider>
       </UserContext.Provider>
     </React.Suspense>
   );

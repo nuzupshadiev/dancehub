@@ -1,10 +1,9 @@
 "use client";
-import React, { useRef } from "react";
+import React, { use, useEffect, useRef } from "react";
 import ReactPlayer from "react-player";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/navigation";
 import {
   Button,
   Input,
@@ -25,7 +24,7 @@ import CommentsSection from "./comments";
 import DescriptionSection from "./description";
 
 import Video, * as VideoAPI from "@/src/API/video";
-import { UserContext } from "@/utils/user-context";
+import { UserContext, VideoVersionContext } from "@/utils/user-context";
 import { UserT } from "@/src/API/user";
 import VideoInput from "@/components/videoInput";
 import Project from "@/src/API/project";
@@ -61,6 +60,7 @@ function VideoPage({
   const videoVersions = React.useMemo(() => {
     return video?.data.versions.map((version) => version) || [];
   }, [video]);
+  const { videoVersion } = React.useContext(VideoVersionContext);
 
   React.useEffect(() => {
     setVideoUrl(null);
@@ -170,6 +170,13 @@ function VideoPage({
     },
     [params.id, user, setVideo, setLikes, setIsLiked, setWarningMessage]
   );
+
+  useEffect(() => {
+    if (videoVersion === "") return;
+
+    handleSelectVersion(new Set([videoVersion]));
+  }, [videoVersion, handleSelectVersion]);
+
   const handleOnProgress = React.useCallback((state: OnProgressProps) => {
     setSecondsElapsed(state.playedSeconds);
   }, []);

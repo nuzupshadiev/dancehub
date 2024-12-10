@@ -1,6 +1,6 @@
 "use client";
 import Project from "@/src/API/project";
-import { UserContext } from "@/utils/user-context";
+import { UserContext, VideoVersionContext } from "@/utils/user-context";
 import { Button } from "@nextui-org/button";
 import {
   Card,
@@ -12,7 +12,6 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import { on } from "events";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -25,6 +24,7 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [currentMatch, setCurrentMatch] = React.useState("");
   const { user } = React.useContext(UserContext);
+  const { setVideoVersion } = React.useContext(VideoVersionContext);
   const [listOfVideos, setListOfVideos] = React.useState<
     { desription: string; id: string; title: string }[]
   >([]);
@@ -119,8 +119,15 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
   };
 
   const handleGotoProject = React.useCallback(
-    (id: string) => {
-      router.push(`/video/${id}`);
+    (comment: {
+      project: string;
+      title: string;
+      version: string;
+      content: string;
+      id: string;
+    }) => {
+      setVideoVersion(comment.version);
+      router.push(`/video/${comment.id}`);
       onOpenChange();
     },
     [router, onOpenChange]
@@ -139,22 +146,26 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
               <ModalBody>
                 <div className="flex flex-col pb-4 gap-2">
                   {listOfComments.length > 0 ? (
-                    listOfComments.map((comment, index) => (
-                      <div
-                        key={index}
-                        className="cursor-pointer bg-default-200 p-2 rounded-lg"
-                        onClick={() => handleGotoProject(comment.id)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <h1 className="font-semibold">{comment.title}</h1>
-                        <p>
-                          {comment.content.length > 150
-                            ? `${comment.content.slice(0, 50)}...`
-                            : comment.content}
-                        </p>
-                      </div>
-                    ))
+                    listOfComments.map((comment, index) => {
+                      const date = new Date(comment.version);
+
+                      return (
+                        <div
+                          key={index}
+                          className="cursor-pointer bg-default-200 p-2 rounded-lg"
+                          onClick={() => handleGotoProject(comment)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <h1 className="font-semibold">{`${comment.title} | ${date.toLocaleString()}`}</h1>
+                          <p>
+                            {comment.content.length > 150
+                              ? `${comment.content.slice(0, 50)}...`
+                              : comment.content}
+                          </p>
+                        </div>
+                      );
+                    })
                   ) : (
                     <p className="pb-4">No comments with this hashtag yet</p>
                   )}

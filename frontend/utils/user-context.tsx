@@ -14,3 +14,13 @@ export const UserContext = React.createContext<UserContextT>({
   user: null,
   setUser: () => {},
 });
+
+export type VideoVersionContextT = {
+  videoVersion: string;
+  setVideoVersion: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export const VideoVersionContext = React.createContext<VideoVersionContextT>({
+  videoVersion: "",
+  setVideoVersion: () => {},
+});

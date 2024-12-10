@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Input } from "@nextui-org/input";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -124,6 +124,12 @@ function ProjectPage({
     setVideos,
     onCreateClose,
   ]);
+
+  useEffect(() => {
+    setVideoDescription("");
+    setVideoTitle("");
+    setVideoUrl(null);
+  }, [onCreateOpenChange]);
 
   if (!user) {
     return <p>You need to be logged in</p>;

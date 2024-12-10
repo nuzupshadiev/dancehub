@@ -39,6 +39,10 @@ export default function CommentsSection({
   const { user } = React.useContext(UserContext);
   const handleCancel = React.useCallback(() => {
     setCommentText("");
+    setStartMinutes("");
+    setStartSeconds("");
+    setEndMinutes("");
+    setEndSeconds("");
     setIsTyping(false);
   }, []);
 
@@ -118,6 +122,13 @@ export default function CommentsSection({
       });
   }, []);
 
+  const sortedInTimeTexts = inTimeTexts.sort((a, b) => {
+    const [startMinA, startSecA] = a.start.split(":").map(Number);
+    const [startMinB, startSecB] = b.start.split(":").map(Number);
+
+    return startMinA * 60 + startSecA - (startMinB * 60 + startSecB);
+  });
+
   if (!user) return null;
 
   return (
@@ -130,7 +141,7 @@ export default function CommentsSection({
           </p>
         ) : (
           <div style={{ overflowY: "auto", maxHeight: "500px" }}>
-            {inTimeTexts.map((comment) => (
+            {sortedInTimeTexts.map((comment) => (
               <Comment
                 key={comment.id}
                 comment={comment}

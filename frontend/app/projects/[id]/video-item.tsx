@@ -14,6 +14,7 @@ import { faCopy, faTrash, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { VideoT } from "@/src/API/video";
 import { useRouter } from "next/navigation";
 import Project, { ProjectVideoT } from "@/src/API/project";
+import { UserContext } from "@/utils/user-context";
 
 interface VideoItemProps {
   video: ProjectVideoT;
@@ -26,6 +27,9 @@ const VideoItem = ({ video, deleteVideo }: VideoItemProps) => {
     onOpenChange: onProjectSettingOpenChange,
   } = useDisclosure();
 
+  const {user} = React.useContext(UserContext);
+
+  // const isAdmin = Number() === user?.data.id;
   const { id, title, thumbnailUrl, description } = video;
 
   const router = useRouter();

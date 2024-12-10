@@ -14,6 +14,7 @@ function Login() {
   const [errorMessage, setErrorMessage] = React.useState("");
   const router = useRouter();
   const { user, setUser } = React.useContext(UserContext);
+  const loginRef = React.useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -42,9 +43,14 @@ function Login() {
 
   const handleOnKeyDown = React.useCallback<
     React.KeyboardEventHandler<HTMLInputElement>
-  >((e) => {
-    e.key === "Enter" && handleLogin();
-  }, []);
+  >(
+    (e) => {
+      if (e.key === "Enter" && loginRef.current) {
+        loginRef.current.click();
+      }
+    },
+    [email, password, loginRef]
+  );
 
   return (
     <div className="flex flex-col justify-center items-center h-full">
@@ -60,7 +66,7 @@ function Login() {
           placeholder="Enter your email"
           value={email}
           variant="underlined"
-          onKeyDown={handleOnKeyDown}
+          // onKeyDown={handleOnKeyDown}
           onValueChange={setEmail}
         />
         <Input
@@ -76,7 +82,7 @@ function Login() {
             {errorMessage}
           </p>
         )}
-        <Button fullWidth onPress={handleLogin}>
+        <Button fullWidth onPress={handleLogin} ref={loginRef}>
           Login
         </Button>
         <div className="flex justify-center items-center gap-1">

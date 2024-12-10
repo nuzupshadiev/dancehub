@@ -114,6 +114,7 @@ function Page() {
       });
   }, [projectName]);
 
+
   if (!user) {
     <p>{"You need to be logged in"}</p>;
   }

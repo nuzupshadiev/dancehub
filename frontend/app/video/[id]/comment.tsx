@@ -272,9 +272,9 @@ export default function Comment({
             </div>
             <div className="flex justify-center items-center">
               <Button
+                radius="lg"
                 size="sm"
                 variant="light"
-                radius="lg"
                 onPress={() => setIsReplying(true)}
               >
                 Reply
@@ -285,12 +285,12 @@ export default function Comment({
             <div className="mt-2 w-full flex flex-col gap-2">
               <CommentInput
                 fullWidth
-                value={replyText}
-                onChangeValue={setReplyText}
-                setHashtagsParent={setReplyHashtags}
                 placeholder="Add a reply..."
+                setHashtagsParent={setReplyHashtags}
                 size="sm"
+                value={replyText}
                 variant="underlined"
+                onChangeValue={setReplyText}
               />
               {/* <Input
               fullWidth
@@ -313,16 +313,16 @@ export default function Comment({
           <div className="mt-2">
             {replyComments && replyComments.length > 0 && (
               <Button
-                size="sm"
                 className="w-fit"
-                variant="light"
-                radius="lg"
-                onPress={() => setIsReplyCommentShown((prev) => !prev)}
                 endContent={
                   <FontAwesomeIcon
                     icon={isReplyCommentShown ? faChevronUp : faChevronDown}
                   />
                 }
+                radius="lg"
+                size="sm"
+                variant="light"
+                onPress={() => setIsReplyCommentShown((prev) => !prev)}
               >
                 {replyComments.length} Replies
               </Button>
@@ -332,11 +332,11 @@ export default function Comment({
                 <ReplyComment
                   key={replyComment.id}
                   comment={replyComment}
-                  deleteComment={deleteComment}
                   commentId={comment.id}
-                  videoId={video.data.id}
+                  deleteComment={deleteComment}
                   deleteReply={deleteReply}
                   projectId={video.data.project}
+                  videoId={video.data.id}
                 />
               ))}
           </div>

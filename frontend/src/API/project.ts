@@ -28,12 +28,14 @@ export type TagResponseT = {
     title: string;
     version: string;
     content: string;
+    id: string;
   }[];
   replies: {
     project: string;
     title: string;
     version: string;
     content: string;
+    id: string;
   }[];
   related: {
     id: string;
@@ -269,7 +271,7 @@ export default class Project {
       },
       params: {
         projectId: projectId,
-        tagName: tagName,
+        tagName: tagName.substring(1),
       },
     }).then((resp) => {
       return resp.data;

@@ -34,6 +34,7 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
       title: string;
       version: string;
       content: string;
+      id: string;
     }[]
   >([]);
   const [projectTitle, setProjectTitle] = React.useState("");
@@ -118,8 +119,8 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
   };
 
   const handleGotoProject = React.useCallback(
-    (video: { desription: string; id: string; title: string }) => {
-      router.push(`/video/${video.id}`);
+    (id: string) => {
+      router.push(`/video/${id}`);
       onOpenChange();
     },
     [router, onOpenChange]
@@ -136,16 +137,26 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
                 All comments for {currentMatch}
               </ModalHeader>
               <ModalBody>
-                <div>
-                  {listOfComments.length === 0 ? (
+                <div className="flex flex-col pb-4 gap-2">
+                  {listOfComments.length > 0 ? (
                     listOfComments.map((comment, index) => (
-                      <div key={index} className="cursor-pointer">
-                        <h1>{comment.title}</h1>
-                        <p>{comment.content}</p>
+                      <div
+                        key={index}
+                        className="cursor-pointer bg-default-200 p-2 rounded-lg"
+                        onClick={() => handleGotoProject(comment.id)}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        <h1 className="font-semibold">{comment.title}</h1>
+                        <p>
+                          {comment.content.length > 150
+                            ? `${comment.content.slice(0, 50)}...`
+                            : comment.content}
+                        </p>
                       </div>
                     ))
                   ) : (
-                    <p>No comments with this hashtag yet</p>
+                    <p className="pb-4">No comments with this hashtag yet</p>
                   )}
                 </div>
               </ModalBody>

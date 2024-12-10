@@ -38,7 +38,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
     let match;
 
     while ((match = hashtagRegex.exec(text)) !== null) {
-      hashtags.push(`#${match[1]}`);
+      hashtags.push(`${match[1]}`);
     }
 
     return hashtags;

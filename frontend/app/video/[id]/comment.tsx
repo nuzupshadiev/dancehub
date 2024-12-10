@@ -194,14 +194,6 @@ export default function Comment({
                 size="sm"
                 variant="underlined"
               />
-              {/* <Input
-              fullWidth
-              placeholder="Add a public comment..."
-              size="sm"
-              value={value}
-              variant="underlined"
-              onValueChange={setValue}
-            /> */}
               <div className="flex gap-2 mt-2 justify-end">
                 <div className="flex gap-2 items-center">
                   <TimeInput

@@ -143,14 +143,14 @@ const HighlightText: React.FC<HighlightTextProps> = ({ text, projectId }) => {
                   </div>
                 ))}
               </ModalBody>
-              <ModalFooter>
+              {/* <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
                 <Button color="primary" onPress={onClose}>
                   Action
                 </Button>
-              </ModalFooter>
+              </ModalFooter> */}
             </>
           )}
         </ModalContent>

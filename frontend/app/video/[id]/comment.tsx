@@ -343,7 +343,7 @@ export default function Comment({
         </div>
       </div>
       {/* If comment is mine */}
-      {user.data.id.toString() === comment.user.id.toString() && (
+      {user.data.id.toString() === comment.user.id.toString() ? (
         <div>
           <Dropdown>
             <DropdownTrigger>
@@ -364,6 +364,26 @@ export default function Comment({
             </DropdownMenu>
           </Dropdown>
         </div>
+      ) : (
+        comment.isAdmin && (
+          <div>
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly radius="full" variant="light">
+                  <FontAwesomeIcon icon={faEllipsisVertical} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Static Actions">
+                <DropdownItem
+                  key="copy"
+                  onPress={() => deleteComment(comment.id)}
+                >
+                  Delete
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        )
       )}
     </div>
   );

@@ -11,6 +11,7 @@ export type CommentT = {
   start: string;
   end: string;
   user: UserT;
+  isAdmin: boolean;
   content: string;
   likes: number;
   likedBy: UserT[];

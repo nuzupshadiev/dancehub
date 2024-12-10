@@ -278,7 +278,7 @@ function VideoPage({
           <DescriptionSection video={video} />
         </div>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 grow">
         <CommentsSection
           relevantOnly={relevantOnly}
           goToTime={goToTime}

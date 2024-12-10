@@ -132,7 +132,7 @@ export default function CommentsSection({
   if (!user) return null;
 
   return (
-    <div className="comments-section">
+    <div className="comments-section  bg-default-100 rounded-lg p-4">
       <div className="">
         {inTimeTexts.length === 0 ? (
           <p className="py-4">
@@ -140,7 +140,7 @@ export default function CommentsSection({
             the first to comment!
           </p>
         ) : (
-          <div style={{ overflowY: "auto", maxHeight: "500px" }}>
+          <div className="overflow-auto max-h-[500px] w-full">
             {sortedInTimeTexts.map((comment) => (
               <Comment
                 key={comment.id}
@@ -154,15 +154,19 @@ export default function CommentsSection({
         )}
       </div>
       <div className="py-4 flex flex-row gap-4 items-start">
-        <Avatar src={user.data.profilePicture} />{" "}
+        <Avatar
+          showFallback
+          name={user.data.name}
+          src={user.data.profilePicture}
+        />{" "}
         <div className="flex-1">
           <CommentInput
             fullWidth
-            value={commentText}
+            mentionSuggestions={usersInTheProject}
             setHashtagsParent={setHashtags}
+            value={commentText}
             onChangeValue={setCommentText}
             onFocus={() => setIsTyping(true)}
-            mentionSuggestions={usersInTheProject}
           />
           {/* <Input
             fullWidth

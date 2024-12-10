@@ -16,11 +16,13 @@ export default function DescriptionSection({ video }: DescriptionSectionProps) {
   const previewText = `${description.slice(0, 150)}${description.length > 150 ? "..." : ""}`;
 
   return (
-    <Card shadow="none" className="bg-default-200">
+    <Card shadow="none" className="bg-default-100">
       <CardHeader>
         <User
           avatarProps={{
             src: video.data.uploader.profileUrl,
+            showFallback: true,
+            name: video.data.uploader.name,
           }}
           description={video.data.uploader.name}
           name={video.data.uploader.name}

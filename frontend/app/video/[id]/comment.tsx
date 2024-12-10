@@ -169,27 +169,32 @@ export default function Comment({
   }
 
   return (
-    <div className="py-3 shadow-none flex flex-row gap-4 items-start">
-      <Avatar src={comment.user.profileUrl} />
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold">{comment.user.name}</p>
-          <p className="text-xs text-gray-500">
-            {new Date(comment.modifiedAt).toLocaleString()}
-          </p>
-        </div>
-        {isEditing ? (
-          <div className="flex-1">
-            <CommentInput
-              value={value}
-              onChangeValue={setValue}
-              setHashtagsParent={setHashtags}
-              fullWidth
-              placeholder="Add a public comment..."
-              size="sm"
-              variant="underlined"
-            />
-            {/* <Input
+    <div className="py-3 shadow-none flex flex-row gap-4 items-start justify-between">
+      <div className="flex flex-row gap-4 grow">
+        <Avatar
+          showFallback
+          name={comment.user.name}
+          src={comment.user.profileUrl}
+        />
+        <div className="flex flex-col grow">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold">{comment.user.name}</p>
+            <p className="text-xs text-gray-500">
+              {new Date(comment.modifiedAt).toLocaleString()}
+            </p>
+          </div>
+          {isEditing ? (
+            <div className="flex-1">
+              <CommentInput
+                value={value}
+                onChangeValue={setValue}
+                setHashtagsParent={setHashtags}
+                fullWidth
+                placeholder="Add a public comment..."
+                size="sm"
+                variant="underlined"
+              />
+              {/* <Input
               fullWidth
               placeholder="Add a public comment..."
               size="sm"
@@ -197,107 +202,105 @@ export default function Comment({
               variant="underlined"
               onValueChange={setValue}
             /> */}
-            <div className="flex gap-2 mt-2 justify-end">
-              <div className="flex gap-2 items-center">
-                <TimeInput
-                  minutes={startMinutes}
-                  seconds={startSeconds}
-                  setMinutes={setStartMinutes}
-                  setSeconds={setStartSeconds}
-                />
-                ~
-                <TimeInput
-                  minutes={endMinutes}
-                  seconds={endSeconds}
-                  setMinutes={setEndMinutes}
-                  setSeconds={setEndSeconds}
-                />
+              <div className="flex gap-2 mt-2 justify-end">
+                <div className="flex gap-2 items-center">
+                  <TimeInput
+                    minutes={startMinutes}
+                    seconds={startSeconds}
+                    setMinutes={setStartMinutes}
+                    setSeconds={setStartSeconds}
+                  />
+                  ~
+                  <TimeInput
+                    minutes={endMinutes}
+                    seconds={endSeconds}
+                    setMinutes={setEndMinutes}
+                    setSeconds={setEndSeconds}
+                  />
+                </div>
+                <Button size="sm" onPress={handleCancelEditComment}>
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  // disabled={!commentText.trim()}
+                  size="sm"
+                  onPress={handleEditComment}
+                >
+                  Save
+                </Button>
               </div>
-              <Button size="sm" onPress={handleCancelEditComment}>
-                Cancel
-              </Button>
-              <Button
-                color="primary"
-                // disabled={!commentText.trim()}
-                size="sm"
-                onPress={handleEditComment}
-              >
-                Save
-              </Button>
             </div>
-          </div>
-        ) : (
-          <div>
+          ) : (
             <div>
-              <HighlightText text={value} projectId={video.data.project} />
-              {/* <MentionText text={value} /> */}
-              {/* <MentionText text={value} /> */}
-            </div>
-            <div className="text-xs text-gray-400 mt-1">
               <div>
-                Start:{" "}
-                {comment.start && (
-                  <button
-                    className="cursor-pointer bg-transparent border-none text-blue-500"
-                    onClick={() => handleGoToTime(comment.start)}
-                  >
-                    {comment.start}
-                  </button>
+                <HighlightText text={value} projectId={video.data.project} />
+              </div>
+              <div className="text-xs text-gray-400 mt-1">
+                <div>
+                  Start:{" "}
+                  {comment.start && (
+                    <button
+                      className="cursor-pointer bg-transparent border-none text-blue-500"
+                      onClick={() => handleGoToTime(comment.start)}
+                    >
+                      {comment.start}
+                    </button>
+                  )}
+                </div>
+                <div>
+                  End:{" "}
+                  {comment.end && (
+                    <button
+                      className="cursor-pointer bg-transparent border-none text-blue-500"
+                      onClick={() => handleGoToTime(comment.end)}
+                    >
+                      {comment.end}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="mt-2 flex flex-row items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
+              <div
+                className="cursor-pointer"
+                role="button"
+                tabIndex={0}
+                onClick={handleLike}
+              >
+                {isLiked ? (
+                  <FontAwesomeIcon color="red" icon={faHeart} />
+                ) : (
+                  <FontAwesomeIcon icon={faHeartRegular} />
                 )}
               </div>
-              <div>
-                End:{" "}
-                {comment.end && (
-                  <button
-                    className="cursor-pointer bg-transparent border-none text-blue-500"
-                    onClick={() => handleGoToTime(comment.end)}
-                  >
-                    {comment.end}
-                  </button>
-                )}
-              </div>
+              <p>{likes}</p>
+            </div>
+            <div className="flex justify-center items-center">
+              <Button
+                size="sm"
+                variant="light"
+                radius="lg"
+                onPress={() => setIsReplying(true)}
+              >
+                Reply
+              </Button>
             </div>
           </div>
-        )}
-        <div className="mt-2 flex flex-row items-center gap-2">
-          <div className="flex items-center justify-center gap-2">
-            <div
-              className="cursor-pointer"
-              role="button"
-              tabIndex={0}
-              onClick={handleLike}
-            >
-              {isLiked ? (
-                <FontAwesomeIcon color="red" icon={faHeart} />
-              ) : (
-                <FontAwesomeIcon icon={faHeartRegular} />
-              )}
-            </div>
-            <p>{likes}</p>
-          </div>
-          <div className="flex justify-center items-center">
-            <Button
-              size="sm"
-              variant="light"
-              radius="lg"
-              onPress={() => setIsReplying(true)}
-            >
-              Reply
-            </Button>
-          </div>
-        </div>
-        {isReplying && (
-          <div className="mt-2 w-full flex flex-col gap-2">
-            <CommentInput
-              fullWidth
-              value={replyText}
-              onChangeValue={setReplyText}
-              setHashtagsParent={setReplyHashtags}
-              placeholder="Add a reply..."
-              size="sm"
-              variant="underlined"
-            />
-            {/* <Input
+          {isReplying && (
+            <div className="mt-2 w-full flex flex-col gap-2">
+              <CommentInput
+                fullWidth
+                value={replyText}
+                onChangeValue={setReplyText}
+                setHashtagsParent={setReplyHashtags}
+                placeholder="Add a reply..."
+                size="sm"
+                variant="underlined"
+              />
+              {/* <Input
               fullWidth
               placeholder="Add a reply..."
               size="sm"
@@ -305,45 +308,46 @@ export default function Comment({
               variant="underlined"
               onValueChange={setReplyText}
             /> */}
-            <div className="flex flex-row justify-end gap-2">
-              <Button size="sm" onPress={() => setIsReplying(false)}>
-                Cancel
-              </Button>
-              <Button color="primary" size="sm" onPress={handleReplySubmit}>
-                Reply
-              </Button>
+              <div className="flex flex-row justify-end gap-2">
+                <Button size="sm" onPress={() => setIsReplying(false)}>
+                  Cancel
+                </Button>
+                <Button color="primary" size="sm" onPress={handleReplySubmit}>
+                  Reply
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-        <div className="mt-2">
-          {replyComments && replyComments.length > 0 && (
-            <Button
-              size="sm"
-              className="w-fit"
-              variant="light"
-              radius="lg"
-              onPress={() => setIsReplyCommentShown((prev) => !prev)}
-              endContent={
-                <FontAwesomeIcon
-                  icon={isReplyCommentShown ? faChevronUp : faChevronDown}
-                />
-              }
-            >
-              {replyComments.length} Replies
-            </Button>
           )}
-          {isReplyCommentShown &&
-            replyComments.map((replyComment) => (
-              <ReplyComment
-                key={replyComment.id}
-                comment={replyComment}
-                deleteComment={deleteComment}
-                commentId={comment.id}
-                videoId={video.data.id}
-                deleteReply={deleteReply}
-                projectId={video.data.project}
-              />
-            ))}
+          <div className="mt-2">
+            {replyComments && replyComments.length > 0 && (
+              <Button
+                size="sm"
+                className="w-fit"
+                variant="light"
+                radius="lg"
+                onPress={() => setIsReplyCommentShown((prev) => !prev)}
+                endContent={
+                  <FontAwesomeIcon
+                    icon={isReplyCommentShown ? faChevronUp : faChevronDown}
+                  />
+                }
+              >
+                {replyComments.length} Replies
+              </Button>
+            )}
+            {isReplyCommentShown &&
+              replyComments.map((replyComment) => (
+                <ReplyComment
+                  key={replyComment.id}
+                  comment={replyComment}
+                  deleteComment={deleteComment}
+                  commentId={comment.id}
+                  videoId={video.data.id}
+                  deleteReply={deleteReply}
+                  projectId={video.data.project}
+                />
+              ))}
+          </div>
         </div>
       </div>
       {/* If comment is mine */}

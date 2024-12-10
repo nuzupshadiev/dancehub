@@ -50,6 +50,8 @@ export const Navbar = () => {
           <User
             avatarProps={{
               src: user.data.profilePicture,
+              showFallback: true,
+              name: user.data.name,
             }}
             className="cursor-pointer"
             description={user.data.email}

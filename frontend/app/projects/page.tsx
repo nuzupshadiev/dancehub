@@ -79,6 +79,7 @@ function Page() {
           );
         })
         .catch((err) => {
+          alert("You can't delete this project");
           console.error(err);
         });
     },

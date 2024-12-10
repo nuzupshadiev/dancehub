@@ -76,11 +76,16 @@ function ProjectPage({
   }, [videos, filterValue]);
 
   const deleteVideo = React.useCallback((video: ProjectVideoT) => {
-    Video.deleteVideo(video.id, user).then(() => {
-      setVideos((prev) =>
-        prev.filter((videoItem) => videoItem.id !== video.id)
-      );
-    });
+    Video.deleteVideo(video.id, user)
+      .then(() => {
+        setVideos((prev) =>
+          prev.filter((videoItem) => videoItem.id !== video.id)
+        );
+      })
+      .catch((err) => {
+        alert("You can't delete this video");
+        console.error(err);
+      });
   }, []);
 
   const onVideoUploadHandler = React.useCallback(() => {

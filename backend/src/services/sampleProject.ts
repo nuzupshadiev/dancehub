@@ -75,14 +75,14 @@ async function CreateSample(userId: number) {
   // Upload videos
   const videos = [
     {
-      title: "Waaking Practice",
+      title: "23 Winter Competition",
       description: "Waaking video for the winter competition",
       url: "https://dancehub-backend.run.goorm.site/static/videos/videoFile-1733499898322-480529989.mp4",
       version: "2024-12-06 15:45:33",
       likes: 3,
     },
     {
-      title: "Waaking Performance",
+      title: "23 Winter Competition",
       description: "Waaking video for the winter competition",
       url: "https://dancehub-backend.run.goorm.site/static/videos/videoFile-1733500296562-498101394.mp4",
       version: "2024-12-08 15:53:48",

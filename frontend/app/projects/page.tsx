@@ -40,6 +40,7 @@ function Page() {
   const [filterValue, setFilterValue] = React.useState("");
   const [projectName, setProjectName] = React.useState("");
   const [joinCode, setJoinCode] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
   const { user } = React.useContext(UserContext);
 
   useEffect(() => {
@@ -99,16 +100,20 @@ function Page() {
   }, [joinCode, user]);
 
   const handleCreateProject = React.useCallback(() => {
+    setIsLoading(true);
     if (projectName === "") {
       setWarningMessage("Please enter a project name");
+      setIsLoading(false);
       return;
     }
     Project.createProject(projectName, user)
       .then((project) => {
         setProjects((prev) => [...prev, project]);
+        setIsLoading(false);
         onCreateClose();
       })
       .catch((err) => {
+        setIsLoading(false);
         setWarningMessage("Something went wrong, please try again later");
         console.error(err);
       });
@@ -200,7 +205,7 @@ function Page() {
             <Button variant="light" onPress={onCreateClose}>
               {"Cancel"}
             </Button>
-            <Button onPress={handleCreateProject}>{"Create"}</Button>
+            <Button onPress={handleCreateProject} isLoading={isLoading}>{"Create"}</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

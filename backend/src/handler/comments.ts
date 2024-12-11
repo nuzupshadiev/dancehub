@@ -402,7 +402,7 @@ async function DeleteComment(req: Request, res: Response) {
   const administratorId = videoData[0].administratorId;
 
   // check if user is authorized to delete comment
-  if (comment.userId != userId || userId != administratorId) {
+  if (comment.userId != userId && userId != administratorId) {
     return res.status(403).json({ message: "Unauthorized to delete comment" });
   }
 

@@ -171,13 +171,23 @@ async function AddProject(req: Request, res: Response) {
     [projectId]
   );
   const project = projectData[0];
+  
+  const [administratorData] = await pool.query<RowDataPacket[]>(
+    "select * from user where id = ?",
+    [project.administratorId]
+  );
+  const administrator = {
+    id: administratorData[0].id,
+    name: administratorData[0].name,
+    profileUrl: administratorData[0].profilePicture,
+  };
 
   res.status(201).json({
     message: "Project created successfully",
     project: {
       id: project.id,
       title: project.title,
-      administratorId: project.administratorId,
+      administrator: administrator,
       members: [userId],
       videos: [],
     },

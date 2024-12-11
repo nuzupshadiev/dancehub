@@ -101,7 +101,7 @@ async function GetComments(req: Request, res: Response) {
   const version = new Date(versionString as string);
 
   const [commentsData] = await pool.query<RowDataPacket[]>(
-    `select distinct comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt, administratorId from comment
+    `select distinct comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt from comment
     inner join user on comment.userId = user.id
     where videoId = ? and version = ?`,
     [videoId, version]

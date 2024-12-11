@@ -101,11 +101,19 @@ async function GetComments(req: Request, res: Response) {
   const version = new Date(versionString as string);
 
   const [commentsData] = await pool.query<RowDataPacket[]>(
-    `select distinct comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt from comment
+    `select distinct comment.id as id, videoid, version, start, end, userId, name, profilePicture, content, likes, modifiedAt, administratorId from comment
     inner join user on comment.userId = user.id
     where videoId = ? and version = ?`,
     [videoId, version]
   );
+
+  const [projectData] = await pool.query<RowDataPacket[]>(
+    `select * from video
+    inner join project on video.projectId = project.id
+    where video.id = ?`,
+    [videoId]
+  );
+  const project = projectData[0];
 
   console.log(version);
   console.log(commentsData);
@@ -164,6 +172,7 @@ async function GetComments(req: Request, res: Response) {
         name: comment.name,
         profileUrl: comment.profilePicture,
       },
+      isAdmin: req.user!.id === project.administratorId,
       content: comment.content,
       likes: comment.likes,
       likedBy: likedBy,
@@ -393,7 +402,7 @@ async function DeleteComment(req: Request, res: Response) {
   const administratorId = videoData[0].administratorId;
 
   // check if user is authorized to delete comment
-  if (comment.userId != userId && userId != administratorId) {
+  if (comment.userId != userId || userId != administratorId) {
     return res.status(403).json({ message: "Unauthorized to delete comment" });
   }
 
